@@ -1,0 +1,49 @@
+:root {
+	/* Fonds, du plus profond au plus élevé */
+	--bg-app: #1e1e2e;
+	--bg-surface: #26263a;
+	--bg-raised: #2a2a3d;
+	--bg-hover: #30304a;
+
+	/* Texte */
+	--text-main: #f0f0f0;
+	--text-muted: #8a8aa8;
+	--text-faint: #4a4a6a;
+
+	/* Bordures */
+	--border: #4a4a6a;
+	--border-strong: #6a6a9a;
+	--border-accent: #3d6fb4;
+
+	/* Accent + sémantique */
+	--accent: #e94f37;
+	--ok: #2ea86e;
+	--danger: #e05252;
+
+	/* Rayons */
+	--radius: 10px;
+	--radius-lg: 12px;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: system-ui, sans-serif;
+	background-color: var(--bg-app);
+	color: var(--text-main);
+	min-height: 100vh;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+button {
+	cursor: pointer;
+	font: inherit;
+}
