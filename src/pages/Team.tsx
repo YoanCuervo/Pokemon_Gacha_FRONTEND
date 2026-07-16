@@ -1,19 +1,24 @@
-import { Link } from "react-router";
-import "./Team.css";
 import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 import { getBox } from "../services/box.service";
-import { getTeam } from "../services/team.service";
+import {
+	addToTeam,
+	getTeam,
+	removeFromTeam,
+	reorderTeam,
+} from "../services/team.service";
 import type { BoxResponse, TeamResponse } from "../types";
+import "./Team.css";
 
 function Team() {
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
 	const [team, setTeam] = useState<TeamResponse | null>(null);
-	const [error, setError] = useState<string | null>(null);
 	const [box, setBox] = useState<BoxResponse | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
+	const loadData = useCallback(() => {
 		getTeam()
 			.then(setTeam)
 			.catch((err: unknown) => {
@@ -27,6 +32,44 @@ function Team() {
 			});
 	}, []);
 
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
+
+	async function handleAddToTeam(instanceId: number) {
+		if (openSlot === null) return;
+
+		try {
+			setError(null);
+			await addToTeam(instanceId, openSlot);
+			setOpenSlot(null); // ferme la boîte : le flux naturel
+			loadData(); // recharge team + box depuis le serveur
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
+	async function handleRemoveFromTeam(slot: number) {
+		try {
+			setError(null);
+			await removeFromTeam(slot);
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
+	async function handleClearTeam() {
+		if (!window.confirm("Vider toute l'équipe ?")) return;
+		try {
+			setError(null);
+			await reorderTeam([]); // ordre vide = équipe vidée (contrat back)
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
 	return (
 		<div className="team-overlay">
 			<div className="team-modal">
@@ -36,12 +79,7 @@ function Team() {
 						<X size={20} />
 					</Link>
 				</header>
-				{error && <p style={{ color: "var(--danger)" }}>{error}</p>}
-				{team && (
-					<p style={{ color: "var(--text-muted)" }}>
-						{team.members.length} pokémon — vitesse totale : {team.total_speed}
-					</p>
-				)}
+
 				<div className="team-slots">
 					{[1, 2, 3, 4, 5, 6].map((slot) => {
 						const member = team?.members.find((m) => m.slot_position === slot);
@@ -51,7 +89,9 @@ function Team() {
 								type="button"
 								key={slot}
 								className={`team-slot ${member ? "team-slot--filled" : ""}`}
-								onClick={() => setOpenSlot(slot)}
+								onClick={() =>
+									member ? handleRemoveFromTeam(slot) : setOpenSlot(slot)
+								}
 							>
 								<span className="team-slot-number">n°{slot}</span>
 								{member ? (
@@ -119,7 +159,11 @@ function Team() {
 						<button type="button" className="btn-edit">
 							EDIT POSITION
 						</button>
-						<button type="button" className="btn-clear">
+						<button
+							type="button"
+							className="btn-clear"
+							onClick={handleClearTeam}
+						>
 							CLEAR TEAM
 						</button>
 					</div>
@@ -144,9 +188,7 @@ function Team() {
 								type="button"
 								key={instance.instance_id}
 								className="pokemon-box-slot"
-								onClick={() => {
-									// POST à venir : ajouter instance.instance_id au slot openSlot
-								}}
+								onClick={() => handleAddToTeam(instance.instance_id)}
 							>
 								<span className="box-slot-name">
 									{instance.name}
