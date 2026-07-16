@@ -1,11 +1,23 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import "./Team.css";
 import { Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getTeam } from "../services/team.service";
+import type { TeamResponse } from "../types";
 
 function Team() {
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
+	const [team, setTeam] = useState<TeamResponse | null>(null);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		getTeam()
+			.then(setTeam)
+			.catch((err: unknown) => {
+				setError(err instanceof Error ? err.message : "Erreur inconnue");
+			});
+	}, []);
 
 	return (
 		<div className="team-overlay">
@@ -16,7 +28,12 @@ function Team() {
 						<X size={20} />
 					</Link>
 				</header>
-
+				{error && <p style={{ color: "var(--danger)" }}>{error}</p>}
+				{team && (
+					<p style={{ color: "var(--text-muted)" }}>
+						{team.members.length} pokémon — vitesse totale : {team.total_speed}
+					</p>
+				)}
 				<div className="team-slots">
 					{[1, 2, 3, 4, 5, 6].map((slot) => (
 						<button
@@ -35,7 +52,38 @@ function Team() {
 
 				<div className="team-bottom">
 					<section className="team-stats">
-						<h2>TEAM STATS:</h2>
+						<h2>TEAM STATS</h2>
+						{error && <p className="team-stats-error">{error}</p>}
+						{team && (
+							<ul className="team-stats-list">
+								<li>
+									<span>Membres</span>
+									<strong>{team.members.length}/6</strong>
+								</li>
+								<li>
+									<span>Initiative</span>
+									<strong>{team.total_speed}</strong>
+								</li>
+								<li>
+									<span>ATK</span>
+									<strong>
+										{team.members.reduce((sum, m) => sum + m.stats.atk, 0)}
+									</strong>
+								</li>
+								<li>
+									<span>HP</span>
+									<strong>
+										{team.members.reduce((sum, m) => sum + m.stats.hp, 0)}
+									</strong>
+								</li>
+								<li>
+									<span>DEF</span>
+									<strong>
+										{team.members.reduce((sum, m) => sum + m.stats.def, 0)}
+									</strong>
+								</li>
+							</ul>
+						)}
 					</section>
 					<div className="team-actions">
 						<button type="button" className="btn-edit">

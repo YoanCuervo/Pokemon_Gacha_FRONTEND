@@ -106,6 +106,36 @@
 	color: var(--text-muted);
 }
 
+.team-stats-list {
+	list-style: none;
+	display: flex;
+	gap: 2.5rem;
+	margin-top: 1rem;
+}
+
+.team-stats-list li {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.team-stats-list span {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--text-muted);
+}
+
+.team-stats-list strong {
+	font-size: 1.4rem;
+	color: var(--text-main);
+}
+
+.team-stats-error {
+	margin-top: 1rem;
+	color: var(--danger);
+}
+
 .team-actions {
 	display: flex;
 	flex-direction: column;
