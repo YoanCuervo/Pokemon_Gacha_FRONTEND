@@ -2,6 +2,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Plus } from "lucide-react";
 import type { TeamMember } from "../types";
+import { artworkUrl } from "../utils/sprites";
+import "./TeamSlot.css";
 
 interface TeamSlotProps {
 	slot: number;
@@ -41,6 +43,11 @@ function TeamSlot({ slot, member, editMode, onClick }: TeamSlotProps) {
 			<span className="team-slot-number">n°{slot}</span>
 			{member ? (
 				<div className="team-slot-card">
+					<img
+						src={artworkUrl(member.pokemon_id, member.is_shiny)}
+						alt={member.name}
+						className="team-slot-artwork"
+					/>
 					<span className="team-slot-name">
 						{member.name}
 						{member.is_shiny && <span className="team-slot-shiny">★</span>}

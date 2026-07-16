@@ -3,17 +3,19 @@
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
-	padding: 1.5rem 2rem;
+	padding: 4rem 2rem;
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
+	background-size: cover;
+	background-repeat: no-repeat;
 }
 
 /* --- Bandeau haut --- */
 .home-top {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
-	gap: 1.5rem;
+	gap: 2rem;
 	align-items: start;
 }
 
@@ -89,20 +91,19 @@
 .home-team-slot {
 	aspect-ratio: 3 / 4;
 	display: flex;
-	align-items: flex-end; /* le sprite "posé au sol" du slot */
+	align-items: flex-end;
 	justify-content: center;
 	background: none;
-	border: 1px dashed rgba(74, 74, 106, 0.35); /* repère dev — à retirer avec les sprites */
-	border-radius: var(--radius);
-	color: var(--text-muted);
-	font-size: 0.8rem;
+	border: none;
 	padding-bottom: 0.5rem;
 }
 
-.home-team-name {
-	font-size: 0.75rem;
-	font-weight: bold;
-	color: var(--text-main);
+.home-team-sprite {
+	width: 100%;
+	height: auto;
+	max-height: 100%;
+	object-fit: contain;
+	image-rendering: pixelated;
 }
 
 .home-team-shiny {

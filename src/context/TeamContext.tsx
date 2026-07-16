@@ -12,6 +12,7 @@ import type { BoxResponse, TeamResponse } from "../types";
 
 interface TeamContextValue {
 	team: TeamResponse | null;
+	setTeam: (team: TeamResponse | null) => void;
 	box: BoxResponse | null;
 	error: string | null;
 	setError: (message: string | null) => void;
@@ -44,7 +45,9 @@ export function TeamProvider({ children }: { children: ReactNode }) {
 	}, [loadData]);
 
 	return (
-		<TeamContext.Provider value={{ team, box, error, setError, loadData }}>
+		<TeamContext.Provider
+			value={{ team, setTeam, box, error, setError, loadData }}
+		>
 			{children}
 		</TeamContext.Provider>
 	);
