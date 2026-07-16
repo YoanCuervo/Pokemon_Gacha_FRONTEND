@@ -1,4 +1,10 @@
-import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+	DndContext,
+	type DragEndEvent,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
 import {
 	arrayMove,
 	horizontalListSortingStrategy,
@@ -58,6 +64,9 @@ function Team() {
 		}
 	}
 
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+	);
 	async function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 		if (!over || active.id === over.id) return;
@@ -93,7 +102,7 @@ function Team() {
 						<X size={20} />
 					</Link>
 				</header>
-				<DndContext onDragEnd={handleDragEnd}>
+				<DndContext sensors={sensors} onDragEnd={handleDragEnd}>
 					<SortableContext
 						items={[1, 2, 3, 4, 5, 6]}
 						strategy={horizontalListSortingStrategy}
