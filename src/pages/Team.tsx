@@ -24,7 +24,7 @@ import "./Team.css";
 import { animatedSpriteUrl } from "../utils/sprites";
 
 function Team() {
-	const { team, box, error, setError, loadData } = useTeam();
+	const { team, setTeam, box, error, setError, loadData } = useTeam();
 
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
@@ -67,28 +67,36 @@ function Team() {
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
 	);
+
 	async function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
-		if (!over || active.id === over.id) return;
+		if (!over || active.id === over.id || !team) return;
 
 		const slots = [1, 2, 3, 4, 5, 6];
 		const oldIndex = slots.indexOf(Number(active.id));
 		const newIndex = slots.indexOf(Number(over.id));
 
-		// L'ordre COMPLET des instance_id, positions vides exclues (contrat back)
-		const currentOrder = slots
-			.map((s) => team?.members.find((m) => m.slot_position === s))
-			.map((m) => m?.instance_id);
-
-		const reordered = arrayMove(currentOrder, oldIndex, newIndex).filter(
-			(id): id is number => id !== undefined,
+		// Le tableau des membres dans l'ordre des slots (trous inclus)
+		const bySlot = slots.map((s) =>
+			team.members.find((m) => m.slot_position === s),
 		);
+		const moved = arrayMove(bySlot, oldIndex, newIndex).filter(
+			(m): m is NonNullable<typeof m> => m !== undefined,
+		);
+
+		// OPTIMISTE : on réaffecte les slot_position et on affiche AVANT
+		// le serveur. Légitime ici : le reorder ne change aucune valeur
+		// calculée (total_speed est une somme, indifférente à l'ordre).
+		const previous = team;
+		const optimistic = moved.map((m, i) => ({ ...m, slot_position: i + 1 }));
+		setTeam({ ...team, members: optimistic });
 
 		try {
 			setError(null);
-			await reorderTeam(reordered);
-			loadData();
+			await reorderTeam(optimistic.map((m) => m.instance_id));
+			loadData(); // on re-synchronise quand même : le serveur reste juge
 		} catch (err: unknown) {
+			setTeam(previous); // rollback : l'affichage revient à l'état serveur
 			setError(err instanceof Error ? err.message : "Erreur inconnue");
 		}
 	}
