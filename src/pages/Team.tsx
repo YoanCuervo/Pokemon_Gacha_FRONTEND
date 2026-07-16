@@ -1,23 +1,108 @@
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+	arrayMove,
+	horizontalListSortingStrategy,
+	SortableContext,
+} from "@dnd-kit/sortable";
+import { X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import TeamSlot from "../components/TeamSlot";
+import { getBox } from "../services/box.service";
+import {
+	addToTeam,
+	getTeam,
+	removeFromTeam,
+	reorderTeam,
+} from "../services/team.service";
+import type { BoxResponse, TeamResponse } from "../types";
 import "./Team.css";
-import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getTeam } from "../services/team.service";
-import type { TeamResponse } from "../types";
 
 function Team() {
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
 	const [team, setTeam] = useState<TeamResponse | null>(null);
+	const [box, setBox] = useState<BoxResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [editMode, setEditMode] = useState(false);
 
-	useEffect(() => {
+	const loadData = useCallback(() => {
 		getTeam()
 			.then(setTeam)
 			.catch((err: unknown) => {
 				setError(err instanceof Error ? err.message : "Erreur inconnue");
 			});
+
+		getBox()
+			.then(setBox)
+			.catch((err: unknown) => {
+				setError(err instanceof Error ? err.message : "Erreur inconnue");
+			});
 	}, []);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
+
+	async function handleAddToTeam(instanceId: number) {
+		if (openSlot === null) return;
+
+		try {
+			setError(null);
+			await addToTeam(instanceId, openSlot);
+			setOpenSlot(null); // ferme la boîte : le flux naturel
+			loadData(); // recharge team + box depuis le serveur
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
+	async function handleRemoveFromTeam(slot: number) {
+		try {
+			setError(null);
+			await removeFromTeam(slot);
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
+	async function handleClearTeam() {
+		if (!window.confirm("Vider toute l'équipe ?")) return;
+		try {
+			setError(null);
+			await reorderTeam([]); // ordre vide = équipe vidée (contrat back)
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
+	async function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		if (!over || active.id === over.id) return;
+
+		const slots = [1, 2, 3, 4, 5, 6];
+		const oldIndex = slots.indexOf(Number(active.id));
+		const newIndex = slots.indexOf(Number(over.id));
+
+		// L'ordre COMPLET des instance_id, positions vides exclues (contrat back)
+		const currentOrder = slots
+			.map((s) => team?.members.find((m) => m.slot_position === s))
+			.map((m) => m?.instance_id);
+
+		const reordered = arrayMove(currentOrder, oldIndex, newIndex).filter(
+			(id): id is number => id !== undefined,
+		);
+
+		try {
+			setError(null);
+			await reorderTeam(reordered);
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
 
 	return (
 		<div className="team-overlay">
@@ -28,49 +113,31 @@ function Team() {
 						<X size={20} />
 					</Link>
 				</header>
-				{error && <p style={{ color: "var(--danger)" }}>{error}</p>}
-				{team && (
-					<p style={{ color: "var(--text-muted)" }}>
-						{team.members.length} pokémon — vitesse totale : {team.total_speed}
-					</p>
-				)}
-				<div className="team-slots">
-					{[1, 2, 3, 4, 5, 6].map((slot) => {
-						const member = team?.members.find((m) => m.slot_position === slot);
-
-						return (
-							<button
-								type="button"
-								key={slot}
-								className={`team-slot ${member ? "team-slot--filled" : ""}`}
-								onClick={() => setOpenSlot(slot)}
-							>
-								<span className="team-slot-number">n°{slot}</span>
-								{member ? (
-									<div className="team-slot-card">
-										<span className="team-slot-name">
-											{member.name}
-											{member.is_shiny && (
-												<span className="team-slot-shiny">★</span>
-											)}
-										</span>
-										<span className="team-slot-level">
-											Nv {member.level} — {"★".repeat(member.stars)}
-										</span>
-										<span className="team-slot-types">
-											{member.type_primary}
-											{member.type_secondary && ` / ${member.type_secondary}`}
-										</span>
-									</div>
-								) : (
-									<span className="team-slot-empty">
-										<Plus size={40} />
-									</span>
-								)}
-							</button>
-						);
-					})}
-				</div>
+				<DndContext onDragEnd={handleDragEnd}>
+					<SortableContext
+						items={[1, 2, 3, 4, 5, 6]}
+						strategy={horizontalListSortingStrategy}
+					>
+						<div className="team-slots">
+							{[1, 2, 3, 4, 5, 6].map((slot) => {
+								const member = team?.members.find(
+									(m) => m.slot_position === slot,
+								);
+								return (
+									<TeamSlot
+										key={slot}
+										slot={slot}
+										member={member}
+										editMode={editMode}
+										onClick={() =>
+											member ? handleRemoveFromTeam(slot) : setOpenSlot(slot)
+										}
+									/>
+								);
+							})}
+						</div>
+					</SortableContext>
+				</DndContext>
 
 				<div className="team-bottom">
 					<section className="team-stats">
@@ -108,10 +175,18 @@ function Team() {
 						)}
 					</section>
 					<div className="team-actions">
-						<button type="button" className="btn-edit">
-							EDIT POSITION
+						<button
+							type="button"
+							className="btn-edit"
+							onClick={() => setEditMode(!editMode)}
+						>
+							{editMode ? "TERMINER" : "EDIT POSITION"}
 						</button>
-						<button type="button" className="btn-clear">
+						<button
+							type="button"
+							className="btn-clear"
+							onClick={handleClearTeam}
+						>
 							CLEAR TEAM
 						</button>
 					</div>
@@ -131,11 +206,23 @@ function Team() {
 						</button>
 					</header>
 					<div className="pokemon-box-grid">
-						{Array.from({ length: 18 }, (_, i) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: placeholder statique, remplacé par instance.id au fetch
-							<div key={`box-${i + 1}`} className="pokemon-box-slot">
-								#
-							</div>
+						{box?.instances.map((instance) => (
+							<button
+								type="button"
+								key={instance.instance_id}
+								className="pokemon-box-slot"
+								onClick={() => handleAddToTeam(instance.instance_id)}
+							>
+								<span className="box-slot-name">
+									{instance.name}
+									{instance.is_shiny && (
+										<span className="box-slot-shiny">★</span>
+									)}
+								</span>
+								<span className="box-slot-info">
+									Nv {instance.level} — {"★".repeat(instance.stars)}
+								</span>
+							</button>
 						))}
 					</div>
 				</div>

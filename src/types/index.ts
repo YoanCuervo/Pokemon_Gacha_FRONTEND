@@ -49,3 +49,18 @@ export interface TeamResponse {
 	members: TeamMember[];
 	total_speed: number;
 }
+
+export interface BoxInstance {
+	instance_id: number;
+	pokemon_id: number;
+	name: string;
+	type_primary: string;
+	type_secondary: string | null;
+	level: number;
+	stars: number;
+	is_shiny: boolean;
+}
+
+export interface BoxResponse {
+	instances: BoxInstance[];
+}

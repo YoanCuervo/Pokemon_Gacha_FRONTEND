@@ -238,10 +238,44 @@
 .pokemon-box-slot {
 	aspect-ratio: 1;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	gap: 0.25rem;
+	padding: 0.4rem;
 	background-color: var(--bg-raised);
+	border: 1px solid transparent;
 	border-radius: var(--radius);
-	color: var(--text-faint);
-	font-size: 0.9rem;
+	color: var(--text-main);
+	cursor: pointer;
+	text-align: center;
+}
+
+.pokemon-box-slot:hover {
+	border-color: var(--border-strong);
+	background-color: var(--bg-hover);
+}
+
+.box-slot-name {
+	font-size: 0.8rem;
+	font-weight: bold;
+}
+
+.box-slot-shiny {
+	color: var(--accent);
+	margin-left: 0.15rem;
+}
+
+.box-slot-info {
+	font-size: 0.65rem;
+	color: var(--text-muted);
+}
+
+.team-slot--draggable {
+	cursor: grab;
+	border-color: var(--ok);
+}
+
+.team-slot--draggable:active {
+	cursor: grabbing;
 }
