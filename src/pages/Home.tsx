@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useTeam } from "../context/TeamContext";
+import { animatedSpriteUrl } from "../utils/sprites";
 import "./Home.css";
 
 function Home() {
@@ -37,14 +38,13 @@ function Home() {
 						const member = team?.members.find((m) => m.slot_position === slot);
 						return (
 							<Link key={slot} to="/team" className="home-team-slot">
-								{member ? (
-									<span className="home-team-name">
-										{member.name}
-										{member.is_shiny && (
-											<span className="home-team-shiny">★</span>
-										)}
-									</span>
-								) : null}
+								{member && (
+									<img
+										src={animatedSpriteUrl(member.pokemon_id, member.is_shiny)}
+										alt={member.name}
+										className="home-team-sprite"
+									/>
+								)}
 							</Link>
 						);
 					})}

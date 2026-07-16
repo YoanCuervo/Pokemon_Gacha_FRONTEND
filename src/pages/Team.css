@@ -60,6 +60,13 @@
 	cursor: pointer;
 }
 
+.box-slot-sprite {
+	width: 48px;
+	height: 48px;
+	object-fit: contain;
+	image-rendering: pixelated;
+}
+
 .team-slot:hover {
 	border-color: var(--border-strong);
 	background-color: var(--bg-hover);

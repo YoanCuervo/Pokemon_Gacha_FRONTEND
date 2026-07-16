@@ -15,6 +15,7 @@ import {
 	reorderTeam,
 } from "../services/team.service";
 import "./Team.css";
+import { animatedSpriteUrl } from "../utils/sprites";
 
 function Team() {
 	const { team, box, error, setError, loadData } = useTeam();
@@ -192,6 +193,14 @@ function Team() {
 								className="pokemon-box-slot"
 								onClick={() => handleAddToTeam(instance.instance_id)}
 							>
+								<img
+									src={animatedSpriteUrl(
+										instance.pokemon_id,
+										instance.is_shiny,
+									)}
+									alt={instance.name}
+									className="box-slot-sprite"
+								/>
 								<span className="box-slot-name">
 									{instance.name}
 									{instance.is_shiny && (
