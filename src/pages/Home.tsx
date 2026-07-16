@@ -15,7 +15,10 @@ function Home() {
 				</div>
 				<div className="home-resources">
 					<div className="home-bar">ENDURANCE</div>
-					<div className="home-bar">PUISSANCE — $</div>
+					<div className="home-bar">PUISSANCE</div>
+					<div className="home-bar">
+						POKEDOLLARDS: <span>100$</span>{" "}
+					</div>
 				</div>
 				<div className="home-shop">BOUTIQUE</div>
 			</header>
