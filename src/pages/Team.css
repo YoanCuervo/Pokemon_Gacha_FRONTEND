@@ -270,3 +270,12 @@
 	font-size: 0.65rem;
 	color: var(--text-muted);
 }
+
+.team-slot--draggable {
+	cursor: grab;
+	border-color: var(--ok);
+}
+
+.team-slot--draggable:active {
+	cursor: grabbing;
+}

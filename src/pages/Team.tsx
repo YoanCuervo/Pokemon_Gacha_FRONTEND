@@ -1,6 +1,13 @@
-import { Plus, X } from "lucide-react";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+	arrayMove,
+	horizontalListSortingStrategy,
+	SortableContext,
+} from "@dnd-kit/sortable";
+import { X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import TeamSlot from "../components/TeamSlot";
 import { getBox } from "../services/box.service";
 import {
 	addToTeam,
@@ -17,6 +24,7 @@ function Team() {
 	const [team, setTeam] = useState<TeamResponse | null>(null);
 	const [box, setBox] = useState<BoxResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [editMode, setEditMode] = useState(false);
 
 	const loadData = useCallback(() => {
 		getTeam()
@@ -70,6 +78,32 @@ function Team() {
 		}
 	}
 
+	async function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		if (!over || active.id === over.id) return;
+
+		const slots = [1, 2, 3, 4, 5, 6];
+		const oldIndex = slots.indexOf(Number(active.id));
+		const newIndex = slots.indexOf(Number(over.id));
+
+		// L'ordre COMPLET des instance_id, positions vides exclues (contrat back)
+		const currentOrder = slots
+			.map((s) => team?.members.find((m) => m.slot_position === s))
+			.map((m) => m?.instance_id);
+
+		const reordered = arrayMove(currentOrder, oldIndex, newIndex).filter(
+			(id): id is number => id !== undefined,
+		);
+
+		try {
+			setError(null);
+			await reorderTeam(reordered);
+			loadData();
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : "Erreur inconnue");
+		}
+	}
+
 	return (
 		<div className="team-overlay">
 			<div className="team-modal">
@@ -79,46 +113,31 @@ function Team() {
 						<X size={20} />
 					</Link>
 				</header>
-
-				<div className="team-slots">
-					{[1, 2, 3, 4, 5, 6].map((slot) => {
-						const member = team?.members.find((m) => m.slot_position === slot);
-
-						return (
-							<button
-								type="button"
-								key={slot}
-								className={`team-slot ${member ? "team-slot--filled" : ""}`}
-								onClick={() =>
-									member ? handleRemoveFromTeam(slot) : setOpenSlot(slot)
-								}
-							>
-								<span className="team-slot-number">n°{slot}</span>
-								{member ? (
-									<div className="team-slot-card">
-										<span className="team-slot-name">
-											{member.name}
-											{member.is_shiny && (
-												<span className="team-slot-shiny">★</span>
-											)}
-										</span>
-										<span className="team-slot-level">
-											Nv {member.level} — {"★".repeat(member.stars)}
-										</span>
-										<span className="team-slot-types">
-											{member.type_primary}
-											{member.type_secondary && ` / ${member.type_secondary}`}
-										</span>
-									</div>
-								) : (
-									<span className="team-slot-empty">
-										<Plus size={40} />
-									</span>
-								)}
-							</button>
-						);
-					})}
-				</div>
+				<DndContext onDragEnd={handleDragEnd}>
+					<SortableContext
+						items={[1, 2, 3, 4, 5, 6]}
+						strategy={horizontalListSortingStrategy}
+					>
+						<div className="team-slots">
+							{[1, 2, 3, 4, 5, 6].map((slot) => {
+								const member = team?.members.find(
+									(m) => m.slot_position === slot,
+								);
+								return (
+									<TeamSlot
+										key={slot}
+										slot={slot}
+										member={member}
+										editMode={editMode}
+										onClick={() =>
+											member ? handleRemoveFromTeam(slot) : setOpenSlot(slot)
+										}
+									/>
+								);
+							})}
+						</div>
+					</SortableContext>
+				</DndContext>
 
 				<div className="team-bottom">
 					<section className="team-stats">
@@ -156,8 +175,12 @@ function Team() {
 						)}
 					</section>
 					<div className="team-actions">
-						<button type="button" className="btn-edit">
-							EDIT POSITION
+						<button
+							type="button"
+							className="btn-edit"
+							onClick={() => setEditMode(!editMode)}
+						>
+							{editMode ? "TERMINER" : "EDIT POSITION"}
 						</button>
 						<button
 							type="button"
