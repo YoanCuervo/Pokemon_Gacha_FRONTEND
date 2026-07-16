@@ -1,13 +1,13 @@
 // import frameSvg from "../assets/avatar-frame.svg";
-import "./ProfilePicture.css";
+import "./ProfilPicture.css";
 
-type ProfilePictureProps = {
+type ProfilPictureProps = {
 	photoUrl?: string;
 	level: number;
 	size?: number;
 };
 
-function ProfilePicture({ photoUrl, level, size = 120 }: ProfilePictureProps) {
+function ProfilPicture({ photoUrl, level, size = 120 }: ProfilPictureProps) {
 	return (
 		<div className="pp" style={{ width: size, height: size }}>
 			<div className="pp-photo">
@@ -23,4 +23,4 @@ function ProfilePicture({ photoUrl, level, size = 120 }: ProfilePictureProps) {
 	);
 }
 
-export default ProfilePicture;
+export default ProfilPicture;

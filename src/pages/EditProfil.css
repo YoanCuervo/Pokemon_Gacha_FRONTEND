@@ -1,0 +1,128 @@
+.edit-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 20;
+}
+
+.edit-modal {
+	width: min(520px, 94vw);
+	max-height: 90vh;
+	overflow-y: auto;
+	scrollbar-width: none;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	background-color: var(--bg-surface);
+	border-radius: var(--radius-lg);
+	padding: 2rem;
+}
+
+.edit-modal::-webkit-scrollbar {
+	display: none;
+}
+
+.edit-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.edit-header h2 {
+	font-size: 1.1rem;
+}
+
+.edit-close {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	font-size: 1.2rem;
+}
+
+.edit-slots {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 0.75rem;
+}
+
+.edit-slot {
+	position: relative;
+	aspect-ratio: 1;
+	background-color: var(--bg-raised);
+	border: 2px solid var(--border);
+	border-radius: var(--radius);
+}
+
+.edit-slot-selected {
+	border-color: #f5c518;
+}
+
+.edit-slot-pick {
+	position: absolute;
+	inset: 0;
+	padding: 0;
+	overflow: hidden;
+	background: none;
+	border: none;
+	border-radius: var(--radius);
+	cursor: pointer;
+}
+
+.edit-slot-pick img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.edit-slot-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-faint);
+	font-size: 1.6rem;
+	cursor: pointer;
+}
+
+.edit-slot-empty:hover {
+	border-color: var(--border-strong);
+	background-color: var(--bg-hover);
+}
+
+.edit-slot-delete {
+	position: absolute;
+	bottom: -7px;
+	right: -7px;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2px;
+	background-color: var(--danger);
+	border: none;
+	border-radius: 3px;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.edit-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.edit-use {
+	padding: 0.8rem 2rem;
+	background-color: var(--bg-raised);
+	border: none;
+	border-radius: var(--radius);
+	color: var(--text-main);
+	cursor: pointer;
+}
+
+.edit-use:disabled {
+	color: var(--text-faint);
+	cursor: default;
+}
