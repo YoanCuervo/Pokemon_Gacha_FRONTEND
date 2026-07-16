@@ -5,44 +5,23 @@ import {
 	SortableContext,
 } from "@dnd-kit/sortable";
 import { X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import TeamSlot from "../components/TeamSlot";
-import { getBox } from "../services/box.service";
+import { useTeam } from "../context/TeamContext";
 import {
 	addToTeam,
-	getTeam,
 	removeFromTeam,
 	reorderTeam,
 } from "../services/team.service";
-import type { BoxResponse, TeamResponse } from "../types";
 import "./Team.css";
 
 function Team() {
+	const { team, box, error, setError, loadData } = useTeam();
+
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
-	const [team, setTeam] = useState<TeamResponse | null>(null);
-	const [box, setBox] = useState<BoxResponse | null>(null);
-	const [error, setError] = useState<string | null>(null);
 	const [editMode, setEditMode] = useState(false);
-
-	const loadData = useCallback(() => {
-		getTeam()
-			.then(setTeam)
-			.catch((err: unknown) => {
-				setError(err instanceof Error ? err.message : "Erreur inconnue");
-			});
-
-		getBox()
-			.then(setBox)
-			.catch((err: unknown) => {
-				setError(err instanceof Error ? err.message : "Erreur inconnue");
-			});
-	}, []);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
 
 	async function handleAddToTeam(instanceId: number) {
 		if (openSlot === null) return;

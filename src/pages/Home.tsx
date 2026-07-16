@@ -1,7 +1,10 @@
 import { Link } from "react-router";
+import { useTeam } from "../context/TeamContext";
 import "./Home.css";
 
 function Home() {
+	const { team } = useTeam();
+
 	return (
 		<div className="home">
 			{/* Bandeau haut : profil / ressources / boutique */}
@@ -12,7 +15,10 @@ function Home() {
 				</div>
 				<div className="home-resources">
 					<div className="home-bar">ENDURANCE</div>
-					<div className="home-bar">PUISSANCE — $</div>
+					<div className="home-bar">PUISSANCE</div>
+					<div className="home-bar">
+						POKEDOLLARDS: <span>100$</span>{" "}
+					</div>
 				</div>
 				<div className="home-shop">BOUTIQUE</div>
 			</header>
@@ -27,11 +33,21 @@ function Home() {
 
 				{/* Team au centre */}
 				<div className="home-team-preview">
-					{[1, 2, 3, 4, 5, 6].map((slot) => (
-						<div key={slot} className="home-team-slot">
-							n°{slot}
-						</div>
-					))}
+					{[1, 2, 3, 4, 5, 6].map((slot) => {
+						const member = team?.members.find((m) => m.slot_position === slot);
+						return (
+							<Link key={slot} to="/team" className="home-team-slot">
+								{member ? (
+									<span className="home-team-name">
+										{member.name}
+										{member.is_shiny && (
+											<span className="home-team-shiny">★</span>
+										)}
+									</span>
+								) : null}
+							</Link>
+						);
+					})}
 				</div>
 
 				{/* Colonne droite */}
