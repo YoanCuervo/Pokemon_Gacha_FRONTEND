@@ -1,13 +1,13 @@
 import { Pencil, X } from "lucide-react";
 import { Link, Outlet, useNavigate } from "react-router";
 import ProfilPicture from "../components/ProfilPicture";
-import { usePhotos } from "../context/PhotoContext";
+import { useUser } from "../context/UserContext";
 import { photoUrl } from "../utils/photo";
 import "./Profil.css";
 
 function Profil() {
 	const navigate = useNavigate();
-	const { photos, activePhotoId } = usePhotos();
+	const { photos, activePhotoId } = useUser();
 	const activePhoto = photos.find((p) => p.id === activePhotoId);
 
 	return (

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { usePhotos } from "../context/PhotoContext";
+import { useUser } from "../context/UserContext";
 import {
 	deletePhoto,
 	setActivePhoto,
@@ -14,7 +14,7 @@ const SLOTS = [1, 2, 3, 4];
 
 function EditProfil() {
 	const navigate = useNavigate();
-	const { photos, activePhotoId, loadPhotos, setError } = usePhotos();
+	const { photos, activePhotoId, loadUser, setError } = useUser();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -26,7 +26,7 @@ function EditProfil() {
 		if (!file) return;
 		try {
 			await uploadPhoto(file);
-			await loadPhotos();
+			await loadUser();
 		} catch (err) {
 			setError(String(err));
 		}
@@ -38,7 +38,7 @@ function EditProfil() {
 		try {
 			await deletePhoto(photoId);
 			if (selectedId === photoId) setSelectedId(null);
-			await loadPhotos();
+			await loadUser();
 		} catch (err) {
 			setError(String(err));
 		}
@@ -48,7 +48,7 @@ function EditProfil() {
 		if (selectedId === null) return;
 		try {
 			await setActivePhoto(selectedId);
-			await loadPhotos();
+			await loadUser();
 			setSelectedId(null);
 		} catch (err) {
 			setError(String(err));

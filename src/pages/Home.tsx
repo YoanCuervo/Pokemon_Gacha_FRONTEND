@@ -1,15 +1,15 @@
 import { Link } from "react-router";
 import poke_fond_home from "../assets/poke_fond_home.png";
 import ProfilPicture from "../components/ProfilPicture";
-import { usePhotos } from "../context/PhotoContext";
 import { useTeam } from "../context/TeamContext";
+import { useUser } from "../context/UserContext";
 import { photoUrl } from "../utils/photo";
 import { animatedSpriteUrl } from "../utils/sprites";
 import "./Home.css";
 
 function Home() {
 	const { team } = useTeam();
-	const { photos, activePhotoId } = usePhotos();
+	const { photos, activePhotoId } = useUser();
 	const activePhoto = photos.find((p) => p.id === activePhotoId);
 
 	return (
