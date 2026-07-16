@@ -29,10 +29,6 @@
 	color: var(--text-muted);
 }
 
-.home-lvl {
-	font-size: 0.8rem;
-}
-
 .home-resources {
 	display: flex;
 	flex-direction: column;

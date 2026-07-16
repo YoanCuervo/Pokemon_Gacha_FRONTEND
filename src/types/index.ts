@@ -65,3 +65,14 @@ export interface BoxInstance {
 export interface BoxResponse {
 	instances: BoxInstance[];
 }
+
+export type Photo = {
+	id: number;
+	slot_position: number;
+	file_path: string;
+};
+
+export type PhotosResponse = {
+	photos: Photo[];
+	active_photo_id: number | null;
+};

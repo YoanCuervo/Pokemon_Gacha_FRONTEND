@@ -1,19 +1,28 @@
 import { Link } from "react-router";
 import poke_fond_home from "../assets/poke_fond_home.png";
+import ProfilePicture from "../components/ProfilPicture";
+import { usePhotos } from "../context/PhotoContext";
 import { useTeam } from "../context/TeamContext";
+import { photoUrl } from "../utils/photos";
 import { animatedSpriteUrl } from "../utils/sprites";
 import "./Home.css";
 
 function Home() {
 	const { team } = useTeam();
+	const { photos, activePhotoId } = usePhotos();
+	const activePhoto = photos.find((p) => p.id === activePhotoId);
 
 	return (
 		<div className="home" style={{ backgroundImage: `url(${poke_fond_home})` }}>
 			{/* Bandeau haut : profil / ressources / boutique */}
 			<header className="home-top">
 				<div className="home-profile">
+					<ProfilePicture
+						photoUrl={activePhoto ? photoUrl(activePhoto.file_path) : undefined}
+						level={1}
+						size={72}
+					/>
 					PROFIL
-					<span className="home-lvl">LVL</span>
 				</div>
 				<div className="home-resources">
 					<div className="home-bar">ENDURANCE</div>
