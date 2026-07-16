@@ -35,19 +35,41 @@ function Team() {
 					</p>
 				)}
 				<div className="team-slots">
-					{[1, 2, 3, 4, 5, 6].map((slot) => (
-						<button
-							type="button"
-							key={slot}
-							className="team-slot"
-							onClick={() => setOpenSlot(slot)}
-						>
-							<span className="team-slot-number">n°{slot}</span>
-							<span className="team-slot-empty">
-								<Plus size={40} />
-							</span>
-						</button>
-					))}
+					{[1, 2, 3, 4, 5, 6].map((slot) => {
+						const member = team?.members.find((m) => m.slot_position === slot);
+
+						return (
+							<button
+								type="button"
+								key={slot}
+								className={`team-slot ${member ? "team-slot--filled" : ""}`}
+								onClick={() => setOpenSlot(slot)}
+							>
+								<span className="team-slot-number">n°{slot}</span>
+								{member ? (
+									<div className="team-slot-card">
+										<span className="team-slot-name">
+											{member.name}
+											{member.is_shiny && (
+												<span className="team-slot-shiny">★</span>
+											)}
+										</span>
+										<span className="team-slot-level">
+											Nv {member.level} — {"★".repeat(member.stars)}
+										</span>
+										<span className="team-slot-types">
+											{member.type_primary}
+											{member.type_secondary && ` / ${member.type_secondary}`}
+										</span>
+									</div>
+								) : (
+									<span className="team-slot-empty">
+										<Plus size={40} />
+									</span>
+								)}
+							</button>
+						);
+					})}
 				</div>
 
 				<div className="team-bottom">
