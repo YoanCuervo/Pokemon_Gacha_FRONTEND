@@ -2,18 +2,26 @@ import { Link } from "react-router";
 import "./Team.css";
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getBox } from "../services/box.service";
 import { getTeam } from "../services/team.service";
-import type { TeamResponse } from "../types";
+import type { BoxResponse, TeamResponse } from "../types";
 
 function Team() {
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);
 	const [team, setTeam] = useState<TeamResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [box, setBox] = useState<BoxResponse | null>(null);
 
 	useEffect(() => {
 		getTeam()
 			.then(setTeam)
+			.catch((err: unknown) => {
+				setError(err instanceof Error ? err.message : "Erreur inconnue");
+			});
+
+		getBox()
+			.then(setBox)
 			.catch((err: unknown) => {
 				setError(err instanceof Error ? err.message : "Erreur inconnue");
 			});
@@ -131,11 +139,25 @@ function Team() {
 						</button>
 					</header>
 					<div className="pokemon-box-grid">
-						{Array.from({ length: 18 }, (_, i) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: placeholder statique, remplacé par instance.id au fetch
-							<div key={`box-${i + 1}`} className="pokemon-box-slot">
-								#
-							</div>
+						{box?.instances.map((instance) => (
+							<button
+								type="button"
+								key={instance.instance_id}
+								className="pokemon-box-slot"
+								onClick={() => {
+									// POST à venir : ajouter instance.instance_id au slot openSlot
+								}}
+							>
+								<span className="box-slot-name">
+									{instance.name}
+									{instance.is_shiny && (
+										<span className="box-slot-shiny">★</span>
+									)}
+								</span>
+								<span className="box-slot-info">
+									Nv {instance.level} — {"★".repeat(instance.stars)}
+								</span>
+							</button>
 						))}
 					</div>
 				</div>
