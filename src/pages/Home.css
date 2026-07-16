@@ -3,17 +3,19 @@
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
-	padding: 1.5rem 2rem;
+	padding: 4rem 2rem;
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
+	background-size: cover;
+	background-repeat: no-repeat;
 }
 
 /* --- Bandeau haut --- */
 .home-top {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
-	gap: 1.5rem;
+	gap: 2rem;
 	align-items: start;
 }
 

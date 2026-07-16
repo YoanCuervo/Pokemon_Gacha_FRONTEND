@@ -147,7 +147,7 @@ function Team() {
 									<strong>{team.members.length}/6</strong>
 								</li>
 								<li>
-									<span>Initiative</span>
+									<span>SPEED</span>
 									<strong>{team.total_speed}</strong>
 								</li>
 								<li>

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import poke_fond_home from "../assets/poke_fond_home.png";
 import { useTeam } from "../context/TeamContext";
 import { animatedSpriteUrl } from "../utils/sprites";
 import "./Home.css";
@@ -7,7 +8,7 @@ function Home() {
 	const { team } = useTeam();
 
 	return (
-		<div className="home">
+		<div className="home" style={{ backgroundImage: `url(${poke_fond_home})` }}>
 			{/* Bandeau haut : profil / ressources / boutique */}
 			<header className="home-top">
 				<div className="home-profile">
