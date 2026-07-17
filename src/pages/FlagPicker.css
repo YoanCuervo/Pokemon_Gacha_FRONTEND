@@ -27,6 +27,7 @@
 
 .flag-header h2 {
 	font-size: 1.1rem;
+	color: var(--text-second);
 }
 
 .flag-close {
