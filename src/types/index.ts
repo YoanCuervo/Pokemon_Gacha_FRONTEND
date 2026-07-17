@@ -65,3 +65,26 @@ export interface BoxInstance {
 export interface BoxResponse {
 	instances: BoxInstance[];
 }
+
+export type Photo = {
+	id: number;
+	slot_position: number;
+	file_path: string;
+};
+
+export type PhotosResponse = {
+	photos: Photo[];
+	active_photo_id: number | null;
+};
+
+export type User = {
+	id: number;
+	display_name: string;
+	country: string | null;
+	level: number;
+	xp: number;
+	active_avatar_id: number | null;
+};
+
+/** flagcdn : { "fr": "France", "jp": "Japon", ... } */
+export type CountryList = Record<string, string>;

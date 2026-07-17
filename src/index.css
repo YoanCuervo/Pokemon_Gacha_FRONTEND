@@ -1,24 +1,25 @@
 :root {
 	/* Fonds, du plus profond au plus élevé */
-	--bg-app: #1e1e2e;
-	--bg-surface: #26263a;
-	--bg-raised: #2a2a3d;
+	--bg-app: #491b17;
+	--bg-surface: #fffce1;
+	--bg-raised: #501d19;
 	--bg-hover: #30304a;
 
 	/* Texte */
 	--text-main: #f0f0f0;
-	--text-muted: #8a8aa8;
-	--text-faint: #4a4a6a;
+	--text-second: #501d19;
+	--text-muted: #cfcfdd;
+	--text-faint: #c58585;
 
 	/* Bordures */
-	--border: #4a4a6a;
-	--border-strong: #6a6a9a;
-	--border-accent: #3d6fb4;
+	--border: #ffffff;
+	--border-strong: #501d19;
+	--border-accent: #e9d83f;
 
 	/* Accent + sémantique */
 	--accent: #e94f37;
 	--ok: #2ea86e;
-	--danger: #e05252;
+	--danger: #d81a1a;
 
 	/* Rayons */
 	--radius: 10px;

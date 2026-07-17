@@ -1,0 +1,97 @@
+.flag-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 30;
+}
+
+.flag-modal {
+	width: min(560px, 94vw);
+	height: min(880px, 90vh);
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	background-color: var(--bg-surface);
+	border-radius: var(--radius-lg);
+	padding: 2rem;
+}
+
+.flag-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.flag-header h2 {
+	font-size: 1.1rem;
+}
+
+.flag-close {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	font-size: 1.2rem;
+}
+
+.flag-grid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 0.5rem;
+	overflow-y: auto;
+	scrollbar-width: none;
+	flex: 1;
+	min-height: 0;
+}
+
+.flag-grid::-webkit-scrollbar {
+	display: none;
+}
+
+.flag-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.4rem;
+	background-color: var(--bg-raised);
+	border: 2px solid transparent;
+	border-radius: var(--radius);
+	cursor: pointer;
+}
+
+.flag-item:hover {
+	background-color: var(--bg-hover);
+}
+
+.flag-item-selected {
+	border-color: #f5c518;
+}
+
+.flag-item img {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 3;
+	object-fit: contain;
+	display: block;
+}
+
+.flag-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.flag-confirm {
+	padding: 0.8rem 2rem;
+	background-color: var(--bg-raised);
+	border: none;
+	border-radius: var(--radius);
+	color: var(--text-main);
+	cursor: pointer;
+}
+
+.flag-confirm:disabled {
+	color: var(--text-faint);
+	cursor: default;
+}
