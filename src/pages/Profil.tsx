@@ -31,7 +31,7 @@ function Profil() {
 									className="profil-flag"
 								/>
 							)}{" "}
-							| Niv.{user?.level} | {user?.display_name}
+							| Niv.{user?.level} {user?.display_name} [TWiq]
 						</span>
 						<Link to="/profil/edit" className="profil-edit-btn">
 							<Pencil size={16} />
@@ -45,7 +45,7 @@ function Profil() {
 								activePhoto ? photoUrl(activePhoto.file_path) : undefined
 							}
 							level={user?.level ?? 1}
-							size={120}
+							size={180}
 						/>
 						<div className="profil-stats">infos stats</div>
 					</div>

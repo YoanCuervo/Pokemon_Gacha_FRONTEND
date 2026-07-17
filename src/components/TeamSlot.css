@@ -15,7 +15,9 @@
 
 .team-slot:hover {
 	border-color: var(--border-strong);
-	background-color: var(--bg-hover);
+	background-color: var(--bg-hover-gold);
+	color: var(--text-second);
+	font-weight: 500;
 }
 
 .team-slot--filled {
@@ -82,12 +84,11 @@
 
 .team-slot-level {
 	font-size: 0.8rem;
-	color: var(--text-muted);
 }
 
 .team-slot-types {
 	font-size: 0.75rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: var(--text-faint);
+	font-weight: 500;
 }

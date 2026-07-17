@@ -21,7 +21,7 @@ function Home() {
 					<ProfilPicture
 						photoUrl={activePhoto ? photoUrl(activePhoto.file_path) : undefined}
 						level={1}
-						size={72}
+						size={110}
 					/>
 				</Link>
 				<div className="home-resources">
