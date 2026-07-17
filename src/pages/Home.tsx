@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import poke_fond_home from "../assets/poke_fond_home.png";
+import poke_fond_home from "../assets/poke_fond_home.jpg";
 import ProfilPicture from "../components/ProfilPicture";
 import { useTeam } from "../context/TeamContext";
 import { useUser } from "../context/UserContext";

@@ -1,4 +1,4 @@
-// import frameSvg from "../assets/avatar-frame.svg";
+import frameFree from "../assets/frames/avatar_free.png";
 import "./ProfilPicture.css";
 
 type ProfilPictureProps = {
@@ -12,12 +12,12 @@ function ProfilPicture({ photoUrl, level, size = 120 }: ProfilPictureProps) {
 		<div className="pp" style={{ width: size, height: size }}>
 			<div className="pp-photo">
 				{photoUrl ? (
-					<img src={photoUrl} alt="Phot de profil" />
+					<img src={photoUrl} alt="Ph0to de profil" />
 				) : (
 					<div className="pp-empty" />
 				)}
 			</div>
-			<div className="pp-frame" />
+			<img src={frameFree} alt="" className="pp-frame" />
 			<span className="pp-level">{level}</span>
 		</div>
 	);
