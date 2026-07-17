@@ -1,4 +1,4 @@
-import frameFree from "../assets/frames/avatar_free.png";
+import frameFree from "../assets/frames/Avatar_free.png";
 import "./ProfilPicture.css";
 
 type ProfilPictureProps = {
