@@ -9,8 +9,8 @@
 }
 
 .edit-modal {
-	width: min(520px, 94vw);
-	max-height: 90vh;
+	width: min(560px, 94vw);
+	height: min(880px, 90vh);
 	overflow-y: auto;
 	scrollbar-width: none;
 	display: flex;
@@ -110,7 +110,17 @@
 
 .edit-actions {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.edit-flag-btn {
+	padding: 0.8rem 1.5rem;
+	background-color: var(--bg-raised);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-size: 0.9rem;
+	text-decoration: none;
 }
 
 .edit-use {

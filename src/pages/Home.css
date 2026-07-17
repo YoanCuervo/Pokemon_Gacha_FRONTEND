@@ -1,13 +1,34 @@
 .home {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	padding: 4rem 2rem;
+	padding: 2rem 4rem;
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
 	background-size: cover;
+	background-position: center -125px;
 	background-repeat: no-repeat;
+}
+
+.home-top,
+.home-middle,
+.home-bottom {
+	position: relative;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.home-profile,
+.home-bar,
+.home-shop,
+.home-menu-item,
+.home-team-slot,
+.home-team-button,
+.home-chat,
+.home-bag {
+	pointer-events: auto;
 }
 
 /* --- top --- */

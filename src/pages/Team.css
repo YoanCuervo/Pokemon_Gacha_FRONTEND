@@ -5,7 +5,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 1.25rem; /* espace entre le modal et la boîte */
+	gap: 1.25rem;
 	background-color: rgba(0, 0, 0, 0.6);
 	z-index: 10;
 }
@@ -31,6 +31,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	color: var(--text-second);
+	font-size: 1.6rem;
 }
 
 .team-close {

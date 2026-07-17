@@ -10,7 +10,7 @@
 
 .profil-modal {
 	width: min(560px, 94vw);
-	max-height: 90vh;
+	height: min(880px, 90vh);
 	overflow-y: auto;
 	scrollbar-width: none;
 	display: flex;
@@ -33,6 +33,12 @@
 	padding: 0.75rem 1rem;
 	background-color: var(--bg-raised);
 	border-radius: var(--radius);
+}
+
+.profil-identity {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 
 .profil-edit-btn {
@@ -77,6 +83,7 @@
 .profil-foot {
 	display: flex;
 	gap: 1rem;
+	margin-top: auto;
 }
 
 .profil-foot button {
@@ -86,4 +93,12 @@
 	border: none;
 	border-radius: var(--radius);
 	color: var(--text-main);
+}
+
+.profil-flag {
+	width: 32px;
+	height: auto;
+	aspect-ratio: 4 / 4;
+	object-fit: contain;
+	/* vertical-align: middle; */
 }

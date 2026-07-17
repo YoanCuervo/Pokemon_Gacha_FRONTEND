@@ -2,12 +2,13 @@ import { Pencil, X } from "lucide-react";
 import { Link, Outlet, useNavigate } from "react-router";
 import ProfilPicture from "../components/ProfilPicture";
 import { useUser } from "../context/UserContext";
+import { flagUrl } from "../utils/flags";
 import { photoUrl } from "../utils/photo";
 import "./Profil.css";
 
 function Profil() {
 	const navigate = useNavigate();
-	const { photos, activePhotoId } = useUser();
+	const { user, photos, activePhotoId } = useUser();
 	const activePhoto = photos.find((p) => p.id === activePhotoId);
 
 	return (
@@ -22,7 +23,16 @@ function Profil() {
 						<X />
 					</button>
 					<header className="profil-header">
-						<span>FLAG / LVL / NAME</span>
+						<span className="profil-identity">
+							{user?.country && (
+								<img
+									src={flagUrl(user.country, 80)}
+									alt={user.country}
+									className="profil-flag"
+								/>
+							)}{" "}
+							| Niv.{user?.level} | {user?.display_name}
+						</span>
 						<Link to="/profil/edit" className="profil-edit-btn">
 							<Pencil size={16} />
 							Éditer
@@ -34,7 +44,7 @@ function Profil() {
 							photoUrl={
 								activePhoto ? photoUrl(activePhoto.file_path) : undefined
 							}
-							level={1}
+							level={user?.level ?? 1}
 							size={120}
 						/>
 						<div className="profil-stats">infos stats</div>

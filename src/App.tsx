@@ -1,25 +1,28 @@
 import { Route, Routes } from "react-router";
-import { PhotoProvider } from "./context/PhotoContext";
 import { TeamProvider } from "./context/TeamContext";
+import { UserProvider } from "./context/UserContext";
 import EditProfil from "./pages/EditProfil";
+import FlagPicker from "./pages/FlagPicker";
 import Home from "./pages/Home";
 import Profil from "./pages/Profil";
 import Team from "./pages/Team";
 
 function App() {
 	return (
-		<PhotoProvider>
+		<UserProvider>
 			<TeamProvider>
 				<Home />
 				<Routes>
 					<Route path="/" element={null} />
 					<Route path="/team" element={<Team />} />
 					<Route path="/profil" element={<Profil />}>
-						<Route path="edit" element={<EditProfil />} />
+						<Route path="edit" element={<EditProfil />}>
+							<Route path="flag" element={<FlagPicker />} />
+						</Route>
 					</Route>
 				</Routes>
 			</TeamProvider>
-		</PhotoProvider>
+		</UserProvider>
 	);
 }
 

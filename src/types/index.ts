@@ -85,3 +85,6 @@ export type User = {
 	xp: number;
 	active_avatar_id: number | null;
 };
+
+/** flagcdn : { "fr": "France", "jp": "Japon", ... } */
+export type CountryList = Record<string, string>;

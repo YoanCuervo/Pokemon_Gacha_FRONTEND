@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { useUser } from "../context/UserContext";
 import {
 	deletePhoto,
@@ -56,81 +56,87 @@ function EditProfil() {
 	}
 
 	return (
-		<div className="edit-overlay">
-			<div className="edit-modal">
-				<header className="edit-header">
-					<h2>Éditer le profil</h2>
-					<button
-						type="button"
-						className="edit-close"
-						onClick={() => navigate("/profil")}
-					>
-						<X />
-					</button>
-				</header>
+		<>
+			<div className="edit-overlay">
+				<div className="edit-modal">
+					<header className="edit-header">
+						<h2>Éditer le profil</h2>
+						<button
+							type="button"
+							className="edit-close"
+							onClick={() => navigate("/profil")}
+						>
+							<X />
+						</button>
+					</header>
 
-				<div className="edit-slots">
-					{SLOTS.map((slot) => {
-						const photo = photos.find((p) => p.slot_position === slot);
+					<div className="edit-slots">
+						{SLOTS.map((slot) => {
+							const photo = photos.find((p) => p.slot_position === slot);
 
-						if (!photo) {
+							if (!photo) {
+								return (
+									<button
+										key={slot}
+										type="button"
+										className="edit-slot edit-slot-empty"
+										onClick={() => fileInputRef.current?.click()}
+									>
+										+
+									</button>
+								);
+							}
+
+							const isSelected = photo.id === currentId;
 							return (
-								<button
+								<div
 									key={slot}
-									type="button"
-									className="edit-slot edit-slot-empty"
-									onClick={() => fileInputRef.current?.click()}
+									className={`edit-slot${isSelected ? " edit-slot-selected" : ""}`}
 								>
-									+
-								</button>
+									<button
+										type="button"
+										className="edit-slot-pick"
+										onClick={() => setSelectedId(photo.id)}
+									>
+										<img src={photoUrl(photo.file_path)} alt="" />
+									</button>
+									<button
+										type="button"
+										className="edit-slot-delete"
+										onClick={() => handleDelete(photo.id)}
+									>
+										<SquareMinus size={16} />
+									</button>
+								</div>
 							);
-						}
+						})}
+					</div>
 
-						const isSelected = photo.id === currentId;
-						return (
-							<div
-								key={slot}
-								className={`edit-slot${isSelected ? " edit-slot-selected" : ""}`}
-							>
-								<button
-									type="button"
-									className="edit-slot-pick"
-									onClick={() => setSelectedId(photo.id)}
-								>
-									<img src={photoUrl(photo.file_path)} alt="" />
-								</button>
-								<button
-									type="button"
-									className="edit-slot-delete"
-									onClick={() => handleDelete(photo.id)}
-								>
-									<SquareMinus size={16} />
-								</button>
-							</div>
-						);
-					})}
+					<div className="edit-actions">
+						<Link to="/profil/edit/flag" className="edit-flag-btn">
+							Changer de drapeau
+						</Link>
+						<button
+							type="button"
+							className="edit-use"
+							onClick={handleUse}
+							disabled={!canUse}
+						>
+							Utiliser
+						</button>
+					</div>
+
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept="image/jpeg,image/png,image/webp"
+						onChange={handleFileChange}
+						hidden
+					/>
 				</div>
-
-				<div className="edit-actions">
-					<button
-						type="button"
-						className="edit-use"
-						onClick={handleUse}
-						disabled={!canUse}
-					>
-						Utiliser
-					</button>
-				</div>
-
-				<input
-					ref={fileInputRef}
-					type="file"
-					accept="image/jpeg,image/png,image/webp"
-					onChange={handleFileChange}
-					hidden
-				/>
 			</div>
-		</div>
+			<Outlet />
+		</>
 	);
 }
 

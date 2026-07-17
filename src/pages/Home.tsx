@@ -6,6 +6,7 @@ import { useUser } from "../context/UserContext";
 import { photoUrl } from "../utils/photo";
 import { animatedSpriteUrl } from "../utils/sprites";
 import "./Home.css";
+import WanderingPokemon from "../components/WanderingPokemon";
 
 function Home() {
 	const { team } = useTeam();
@@ -14,6 +15,7 @@ function Home() {
 
 	return (
 		<div className="home" style={{ backgroundImage: `url(${poke_fond_home})` }}>
+			<WanderingPokemon />
 			<header className="home-top">
 				<Link to="/profil" className="home-profile">
 					<ProfilPicture
