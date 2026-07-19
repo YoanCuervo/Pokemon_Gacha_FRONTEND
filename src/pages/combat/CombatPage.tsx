@@ -11,6 +11,7 @@ import type { CombatLog, TeamKey } from "../../types/combat";
 import { Battlefield } from "./Battlefield";
 import { CombatControls } from "./CombatControls";
 import { CombatResult } from "./CombatResult";
+import './combat.css'
 
 /** Dette auth (JWT à venir) : en V1 miroir, le joueur est l'équipe "a".
  *  Quand l'auth existera, myTeamKey sera dérivé de setup.teams.X.user_id

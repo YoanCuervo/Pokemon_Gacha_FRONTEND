@@ -1,0 +1,212 @@
+/* =====================================================================
+   pages/combat/combat.css — Écran COMBAT (layout statique v1)
+   - Terrain deux rangées (adversaire haut / joueur bas), flexbox :
+     le resserrement à la mort est une transition de layout gratuite.
+   - Cartes : fond couleur du type (data-type), losange rôle,
+     pastilles ATTAQUE (verte, statique) / VIE (bleue, vivante).
+   - data-status="dying" : grisé + fondu + léger rétrécissement,
+     calé sur --tempo (injectée par CombatPage, suit le ×2).
+   - Les animations d'ACTION (avance-tape, aura, clive) : chantier suivant.
+   ===================================================================== */
+
+.combat-page {
+	--tempo: 800ms; /* écrasée par le style inline de CombatPage */
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	min-height: 100vh;
+	padding: 24px;
+	background: #1a1c22;
+	color: #fff;
+}
+
+.combat-page__loading,
+.combat-page__error {
+	padding: 48px;
+	text-align: center;
+}
+
+/* ---------------------------------------------------------------------
+   Terrain
+   --------------------------------------------------------------------- */
+
+.battlefield {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 64px; /* l'espace entre les deux rangées = la "zone de charge" */
+	flex: 1;
+}
+
+.battlefield__row {
+	display: flex;
+	justify-content: center;
+	gap: 16px;
+}
+
+/* ---------------------------------------------------------------------
+   Carte
+   --------------------------------------------------------------------- */
+
+.combat-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 110px;
+	padding: 20px 8px 12px;
+	border-radius: 10px;
+	background: var(--type-color, #6b6b6b);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	/* transform/opacity : le grisé de mort ; margin/width ne bougent pas,
+	   le resserrement vient du retrait de la carte du flux (dead → null) */
+	transition:
+		opacity calc(var(--tempo) * 0.8) ease,
+		transform calc(var(--tempo) * 0.8) ease,
+		filter calc(var(--tempo) * 0.8) ease;
+}
+
+.combat-card[data-status="dying"] {
+	filter: grayscale(1);
+	opacity: 0.35;
+	transform: scale(0.9);
+}
+
+.combat-card__sprite {
+	width: 72px;
+	height: 72px;
+	image-rendering: pixelated; /* sprites Gen 1-2 : net, pas flou */
+}
+
+/* Losange rôle */
+.combat-card__role {
+	position: absolute;
+	top: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: #14161a;
+	border: 1px solid rgb(255 255 255 / 25%);
+	font-size: 10px;
+	white-space: nowrap;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* Pastilles ATTAQUE / VIE */
+.combat-card__stats {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	margin-top: 8px;
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.combat-card__attaque,
+.combat-card__vie {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 26px;
+	padding: 0 6px;
+	border-radius: 13px;
+	color: #fff;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+}
+
+.combat-card__attaque {
+	background: #2e9e46; /* verte, statique (contrat §11) */
+}
+
+.combat-card__vie {
+	background: #2f6fd0; /* bleue, vivante */
+}
+
+/* ---------------------------------------------------------------------
+   Couleurs par type (fond de carte) — Gen 1-2, palette classique
+   assombrie pour que les pastilles/sprites ressortent.
+   --------------------------------------------------------------------- */
+
+.combat-card[data-type="normal"]   { --type-color: #8a8a6d; }
+.combat-card[data-type="fire"]     { --type-color: #c4552e; }
+.combat-card[data-type="water"]    { --type-color: #4a70c9; }
+.combat-card[data-type="electric"] { --type-color: #c9a325; }
+.combat-card[data-type="grass"]    { --type-color: #5a9938; }
+.combat-card[data-type="ice"]      { --type-color: #6fb8b6; }
+.combat-card[data-type="fighting"] { --type-color: #a3302a; }
+.combat-card[data-type="poison"]   { --type-color: #8a3d8a; }
+.combat-card[data-type="ground"]   { --type-color: #b3985a; }
+.combat-card[data-type="flying"]   { --type-color: #8578c9; }
+.combat-card[data-type="psychic"]  { --type-color: #d0487c; }
+.combat-card[data-type="bug"]      { --type-color: #8a9a25; }
+.combat-card[data-type="rock"]     { --type-color: #9a8838; }
+.combat-card[data-type="ghost"]    { --type-color: #5c548a; }
+.combat-card[data-type="dragon"]   { --type-color: #5d3fc9; }
+.combat-card[data-type="dark"]     { --type-color: #5a4a3d; }
+.combat-card[data-type="steel"]    { --type-color: #8a8a9a; }
+
+/* ---------------------------------------------------------------------
+   Contrôles
+   --------------------------------------------------------------------- */
+
+.combat-controls {
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+}
+
+.combat-controls button {
+	padding: 8px 20px;
+	border: 1px solid rgb(255 255 255 / 30%);
+	border-radius: 6px;
+	background: #2a2d35;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.combat-controls button:hover:not(:disabled) {
+	background: #3a3e48;
+}
+
+.combat-controls button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.combat-controls__speed[aria-pressed="true"] {
+	background: #2e9e46;
+	border-color: #2e9e46;
+}
+
+/* ---------------------------------------------------------------------
+   Écran de fin — overlay par-dessus le terrain
+   --------------------------------------------------------------------- */
+
+.combat-result {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgb(0 0 0 / 65%);
+	animation: result-in 400ms ease both;
+}
+
+.combat-result h1 {
+	font-size: 64px;
+	letter-spacing: 0.1em;
+}
+
+.combat-result[data-outcome="VICTOIRE"] h1 { color: #4cd964; }
+.combat-result[data-outcome="DÉFAITE"] h1  { color: #e0453a; }
+.combat-result[data-outcome="ÉGALITÉ"] h1  { color: #c9c9c9; }
+
+@keyframes result-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
