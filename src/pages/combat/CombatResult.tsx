@@ -1,9 +1,4 @@
-// =====================================================================
-// pages/combat/CombatResult.tsx — Écran de fin.
-// Libellé via resultLabelFr(result, myTeamKey) ; data-outcome pour
-// styler différemment les trois issues en CSS.
-// =====================================================================
-
+import { Link } from "react-router";
 import { resultLabelFr } from "../../i18n/combat.fr";
 import type { TeamKey } from "../../types/combat";
 
@@ -17,6 +12,9 @@ export function CombatResult({ result, myTeamKey }: Props) {
 	return (
 		<div className="combat-result" data-outcome={label}>
 			<h1>{label}</h1>
+			<Link to="/" className="combat-result__back">
+				RETOUR
+			</Link>
 		</div>
 	);
 }

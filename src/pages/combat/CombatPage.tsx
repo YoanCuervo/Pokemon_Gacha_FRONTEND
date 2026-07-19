@@ -73,6 +73,8 @@ function CombatScreen({ log }: { log: CombatLog }) {
 			<CombatControls
 				speed={player.speed}
 				setSpeed={player.setSpeed}
+				paused={player.paused}
+				togglePause={player.togglePause}
 				skip={player.skip}
 				finished={player.finished}
 			/>

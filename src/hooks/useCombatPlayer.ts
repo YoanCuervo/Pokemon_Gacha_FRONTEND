@@ -32,13 +32,15 @@ interface PlayerState {
 	cursor: number; // index du DERNIER événement consommé (-1 = rien)
 	cards: Record<CombatUid, CardState>;
 	speed: PlayerSpeed;
+	paused: boolean;
 	finished: boolean;
 }
 
 type PlayerAction =
 	| { kind: "tick" }
 	| { kind: "skip" }
-	| { kind: "setSpeed"; speed: PlayerSpeed };
+	| { kind: "setSpeed"; speed: PlayerSpeed }
+	| { kind: "togglePause" };
 
 /** Écrête l'overkill : le log peut porter une vie négative (contrat). */
 function clampVie(v: number): number {
@@ -112,7 +114,7 @@ export function initState(log: CombatLog): PlayerState {
 			}
 		}
 	}
-	return { cursor: 0, cards, speed: 1, finished: false };
+	return { cursor: 0, cards, speed: 1, paused: false, finished: false };
 }
 
 // NOTE : le reducer a besoin du log mais on ne le met pas dans l'état
@@ -126,6 +128,8 @@ export function makeReducer(log: CombatLog) {
 		switch (action.kind) {
 			case "setSpeed":
 				return { ...state, speed: action.speed };
+			case "togglePause":
+				return { ...state, paused: !state.paused };
 			case "tick": {
 				if (state.finished) return state;
 				const cards = cloneCards(state.cards);
@@ -170,6 +174,8 @@ export interface CombatPlayer {
 	currentEvent: CombatEvent | null;
 	speed: PlayerSpeed;
 	setSpeed: (s: PlayerSpeed) => void;
+	paused: boolean;
+	togglePause: () => void;
 	skip: () => void;
 	finished: boolean;
 	/** Résultat, disponible seulement quand finished. */
@@ -184,14 +190,16 @@ export function useCombatPlayer(log: CombatLog): CombatPlayer {
 
 	const tempoMs = BASE_TEMPO_MS / state.speed;
 
+	// Le métronome : un timeout par battement (pas un interval : le tempo
+	// peut changer entre deux battements via ×2).
 	// state.cursor n'est pas lu dans l'effet mais il est le MÉTRONOME :
 	// chaque battement consommé réarme le timeout du suivant.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: cursor réarme volontairement l'effet
 	useEffect(() => {
-		if (state.finished) return;
+		if (state.finished || state.paused) return;
 		const t = setTimeout(() => dispatch({ kind: "tick" }), tempoMs);
 		return () => clearTimeout(t);
-	}, [state.finished, state.cursor, tempoMs]);
+	}, [state.finished, state.paused, state.cursor, tempoMs]);
 
 	const setup = useMemo<SetupEvent | null>(() => {
 		const ev = log.events[0];
@@ -212,6 +220,7 @@ export function useCombatPlayer(log: CombatLog): CombatPlayer {
 		[],
 	);
 	const skip = useCallback(() => dispatch({ kind: "skip" }), []);
+	const togglePause = useCallback(() => dispatch({ kind: "togglePause" }), []);
 
 	return {
 		setup,
@@ -219,6 +228,8 @@ export function useCombatPlayer(log: CombatLog): CombatPlayer {
 		currentEvent,
 		speed: state.speed,
 		setSpeed,
+		paused: state.paused,
+		togglePause,
 		skip,
 		finished: state.finished,
 		result,
