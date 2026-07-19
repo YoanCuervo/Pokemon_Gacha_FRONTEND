@@ -8,20 +8,43 @@
 
 import type { CardState } from "../../hooks/useCombatPlayer";
 import type { CombatUid, TeamKey, TeamSetup } from "../../types/combat";
-import { CombatCard } from "./CombatCard";
+import { type CardAction, CombatCard } from "./CombatCard";
 
 interface RowProps {
 	team: TeamSetup;
 	cards: Record<CombatUid, CardState>;
+	onHover: (uid: string | null) => void;
+	side: "top" | "bottom";
+	actions: Record<CombatUid, CardAction>;
+	actionSeq: number;
+	targetUid: string | null;
 }
 
-function TeamRow({ team, cards }: RowProps) {
+function TeamRow({
+	team,
+	cards,
+	onHover,
+	side,
+	actions,
+	actionSeq,
+	targetUid,
+}: RowProps) {
 	return (
-		<div className="battlefield__row">
+		<div className="battlefield__row" data-side={side}>
 			{team.members.map((m) => {
 				const card = cards[m.uid];
 				if (!card || card.status === "dead") return null;
-				return <CombatCard key={m.uid} member={m} card={card} />;
+				return (
+					<CombatCard
+						key={m.uid}
+						member={m}
+						card={card}
+						onHover={onHover}
+						action={actions[m.uid] ?? null}
+						actionSeq={actionSeq}
+						targetUid={targetUid}
+					/>
+				);
 			})}
 		</div>
 	);
@@ -32,14 +55,42 @@ interface Props {
 	cards: Record<CombatUid, CardState>;
 	/** L'équipe du joueur : rendue en BAS. */
 	myTeamKey: TeamKey;
+	onHover: (uid: string | null) => void;
+	actions: Record<CombatUid, CardAction>;
+	actionSeq: number;
+	targetUid: string | null;
 }
 
-export function Battlefield({ teams, cards, myTeamKey }: Props) {
+export function Battlefield({
+	teams,
+	cards,
+	myTeamKey,
+	onHover,
+	actions,
+	actionSeq,
+	targetUid,
+}: Props) {
 	const opponentKey: TeamKey = myTeamKey === "a" ? "b" : "a";
 	return (
 		<div className="battlefield">
-			<TeamRow team={teams[opponentKey]} cards={cards} />
-			<TeamRow team={teams[myTeamKey]} cards={cards} />
+			<TeamRow
+				team={teams[opponentKey]}
+				cards={cards}
+				onHover={onHover}
+				side="top"
+				actions={actions}
+				actionSeq={actionSeq}
+				targetUid={targetUid}
+			/>
+			<TeamRow
+				team={teams[myTeamKey]}
+				cards={cards}
+				onHover={onHover}
+				side="bottom"
+				actions={actions}
+				actionSeq={actionSeq}
+				targetUid={targetUid}
+			/>
 		</div>
 	);
 }
