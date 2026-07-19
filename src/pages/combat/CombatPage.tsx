@@ -7,11 +7,12 @@
 
 import { useEffect, useState } from "react";
 import { useCombatPlayer } from "../../hooks/useCombatPlayer";
+import { runCombat } from "../../services/combat.service";
 import type { CombatLog, TeamKey } from "../../types/combat";
 import { Battlefield } from "./Battlefield";
 import { CombatControls } from "./CombatControls";
 import { CombatResult } from "./CombatResult";
-import './combat.css'
+import "./combat.css";
 
 /** Dette auth (JWT à venir) : en V1 miroir, le joueur est l'équipe "a".
  *  Quand l'auth existera, myTeamKey sera dérivé de setup.teams.X.user_id
@@ -28,20 +29,17 @@ export function CombatPage() {
 
 	useEffect(() => {
 		let cancelled = false;
-		(async () => {
-			try {
-				const res = await fetch("/api/combat", { method: "POST" });
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				const log = (await res.json()) as CombatLog;
+		runCombat()
+			.then((log) => {
 				if (!cancelled) setLoad({ status: "ready", log });
-			} catch (e) {
+			})
+			.catch((e: unknown) => {
 				if (!cancelled)
 					setLoad({
 						status: "error",
-						message: e instanceof Error ? e.message : "unknown",
+						message: e instanceof Error ? e.message : "Erreur inconnue",
 					});
-			}
-		})();
+			});
 		return () => {
 			cancelled = true;
 		};

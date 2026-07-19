@@ -9,12 +9,7 @@
 import type { CardState } from "../../hooks/useCombatPlayer";
 import { ROLE_FR } from "../../i18n/combat.fr";
 import type { MemberSetup } from "../../types/combat";
-
-/** Sprites en cours d'intégration : centralisé ici, un seul endroit à
- *  changer quand le dossier /sprites sera prêt. */
-function spriteUrl(pokemonId: number, isShiny: boolean): string {
-	return `/sprites/${isShiny ? "shiny/" : ""}${pokemonId}.png`;
-}
+import { animatedSpriteUrl } from "../../utils/sprites";
 
 interface Props {
 	member: MemberSetup;
@@ -32,7 +27,7 @@ export function CombatCard({ member, card }: Props) {
 			<span className="combat-card__role">{ROLE_FR[member.role]}</span>
 			<img
 				className="combat-card__sprite"
-				src={spriteUrl(member.pokemon_id, member.is_shiny)}
+				src={animatedSpriteUrl(member.pokemon_id, member.is_shiny)}
 				alt=""
 			/>
 			<div className="combat-card__stats">

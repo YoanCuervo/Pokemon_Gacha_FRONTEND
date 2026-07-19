@@ -10,8 +10,12 @@
    ===================================================================== */
 
 .combat-page {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	overflow-y: auto;
 	--tempo: 800ms; /* écrasée par le style inline de CombatPage */
-	position: relative;
+	/* position: relative; */
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
@@ -131,23 +135,57 @@
    assombrie pour que les pastilles/sprites ressortent.
    --------------------------------------------------------------------- */
 
-.combat-card[data-type="normal"]   { --type-color: #8a8a6d; }
-.combat-card[data-type="fire"]     { --type-color: #c4552e; }
-.combat-card[data-type="water"]    { --type-color: #4a70c9; }
-.combat-card[data-type="electric"] { --type-color: #c9a325; }
-.combat-card[data-type="grass"]    { --type-color: #5a9938; }
-.combat-card[data-type="ice"]      { --type-color: #6fb8b6; }
-.combat-card[data-type="fighting"] { --type-color: #a3302a; }
-.combat-card[data-type="poison"]   { --type-color: #8a3d8a; }
-.combat-card[data-type="ground"]   { --type-color: #b3985a; }
-.combat-card[data-type="flying"]   { --type-color: #8578c9; }
-.combat-card[data-type="psychic"]  { --type-color: #d0487c; }
-.combat-card[data-type="bug"]      { --type-color: #8a9a25; }
-.combat-card[data-type="rock"]     { --type-color: #9a8838; }
-.combat-card[data-type="ghost"]    { --type-color: #5c548a; }
-.combat-card[data-type="dragon"]   { --type-color: #5d3fc9; }
-.combat-card[data-type="dark"]     { --type-color: #5a4a3d; }
-.combat-card[data-type="steel"]    { --type-color: #8a8a9a; }
+.combat-card[data-type="normal"] {
+	--type-color: #8a8a6d;
+}
+.combat-card[data-type="fire"] {
+	--type-color: #c4552e;
+}
+.combat-card[data-type="water"] {
+	--type-color: #4a70c9;
+}
+.combat-card[data-type="electric"] {
+	--type-color: #c9a325;
+}
+.combat-card[data-type="grass"] {
+	--type-color: #5a9938;
+}
+.combat-card[data-type="ice"] {
+	--type-color: #6fb8b6;
+}
+.combat-card[data-type="fighting"] {
+	--type-color: #a3302a;
+}
+.combat-card[data-type="poison"] {
+	--type-color: #8a3d8a;
+}
+.combat-card[data-type="ground"] {
+	--type-color: #b3985a;
+}
+.combat-card[data-type="flying"] {
+	--type-color: #8578c9;
+}
+.combat-card[data-type="psychic"] {
+	--type-color: #d0487c;
+}
+.combat-card[data-type="bug"] {
+	--type-color: #8a9a25;
+}
+.combat-card[data-type="rock"] {
+	--type-color: #9a8838;
+}
+.combat-card[data-type="ghost"] {
+	--type-color: #5c548a;
+}
+.combat-card[data-type="dragon"] {
+	--type-color: #5d3fc9;
+}
+.combat-card[data-type="dark"] {
+	--type-color: #5a4a3d;
+}
+.combat-card[data-type="steel"] {
+	--type-color: #8a8a9a;
+}
 
 /* ---------------------------------------------------------------------
    Contrôles
@@ -202,11 +240,21 @@
 	letter-spacing: 0.1em;
 }
 
-.combat-result[data-outcome="VICTOIRE"] h1 { color: #4cd964; }
-.combat-result[data-outcome="DÉFAITE"] h1  { color: #e0453a; }
-.combat-result[data-outcome="ÉGALITÉ"] h1  { color: #c9c9c9; }
+.combat-result[data-outcome="VICTOIRE"] h1 {
+	color: #4cd964;
+}
+.combat-result[data-outcome="DÉFAITE"] h1 {
+	color: #e0453a;
+}
+.combat-result[data-outcome="ÉGALITÉ"] h1 {
+	color: #c9c9c9;
+}
 
 @keyframes result-in {
-	from { opacity: 0; }
-	to   { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
