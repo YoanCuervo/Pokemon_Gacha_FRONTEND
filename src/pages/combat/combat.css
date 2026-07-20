@@ -11,13 +11,18 @@
 	inset: 0;
 	z-index: 100;
 	overflow-y: auto;
-	--tempo: 800ms; /* écrasée par le style inline de CombatPage */
+	--tempo: 800ms;
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
 	padding: 24px;
-	background: #1a1c22;
+	background: #1a1c22 var(--arena-image, none) center / cover no-repeat;
 	color: #fff;
+	--rarity-common: #7a7f87;
+	--rarity-rare: #3d7dd4;
+	--rarity-ultra_rare: #8e44c9;
+	--rarity-legendary: #d4952e;
+	--rarity-mythic: #cf3b3b;
 }
 
 .combat-page__loading,
@@ -34,14 +39,14 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	gap: 64px;
+	gap: 151px;
 	flex: 1;
 }
 
 .battlefield__row {
 	display: flex;
 	justify-content: center;
-	gap: 36px; /* large : les pastilles debordantes ne se chevauchent pas */
+	gap: 64px;
 }
 
 /* ---------------------------------------------------------------------
@@ -57,8 +62,8 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	width: 110px;
-	padding: 20px 8px 22px; /* bas : place pour les pastilles débordantes */
+	width: 150px;
+	padding: 24px 10px 26px;
 	border-radius: 10px;
 	background: var(--type-color, #6b6b6b);
 	box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
@@ -75,8 +80,8 @@
 }
 
 .combat-card__sprite {
-	width: 72px;
-	height: 72px;
+	width: 104px;
+	height: 104px;
 	image-rendering: pixelated;
 }
 
@@ -201,8 +206,10 @@
    --------------------------------------------------------------------- */
 
 .combat-controls {
+	position: fixed;
+	left: 24px;
+	bottom: 24px;
 	display: flex;
-	justify-content: center;
 	gap: 12px;
 }
 
@@ -295,7 +302,7 @@
 .card-preview {
 	position: fixed;
 	top: 50%;
-	right: 24px;
+	right: 160px;
 	transform: translateY(-50%);
 	z-index: 150;
 	display: flex;
@@ -383,20 +390,6 @@
 	border: 1px dashed rgb(255 255 255 / 35%);
 	background: rgb(0 0 0 / 20%);
 }
-/* ---------------------------------------------------------------------
-   Raretés — palette transverse (slots combat aujourd'hui ; inventaire,
-   gacha demain). Ne vivent qu'ici tant que seul le combat les lit ;
-   à remonter dans :root (index.css) au premier second consommateur.
-   --------------------------------------------------------------------- */
-
-.combat-page {
-	--rarity-common: #7a7f87;
-	--rarity-rare: #3d7dd4;
-	--rarity-ultra_rare: #8e44c9;
-	--rarity-legendary: #d4952e;
-	--rarity-mythic: #cf3b3b;
-}
-
 /* Slot rempli : fond = rareté, catégorie lisible dedans. Le slot vide
    garde son pointillé (règle de base .card-preview__item inchangée). */
 .card-preview__item[data-rarity] {

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCombatPlayer } from "../../hooks/useCombatPlayer";
 import { runCombat } from "../../services/combat.service";
 import type { CombatLog, CombatUid, TeamKey } from "../../types/combat";
+import { ARENA_IMAGE } from "../../utils/arenas";
 import { Battlefield } from "./Battlefield";
 import { CardPreview } from "./CardPreview";
 import type { CardAction } from "./CombatCard";
@@ -109,7 +110,12 @@ function CombatScreen({ log }: { log: CombatLog }) {
 	return (
 		<div
 			className="combat-page"
-			style={{ ["--tempo" as string]: `${player.tempoMs}ms` }}
+			style={{
+				["--tempo" as string]: `${player.tempoMs}ms`,
+				["--arena-image" as string]: player.setup
+					? `url(${ARENA_IMAGE[player.setup.arena]})`
+					: "none",
+			}}
 		>
 			<Battlefield
 				teams={player.setup.teams}
