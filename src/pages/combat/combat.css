@@ -323,9 +323,7 @@
 }
 
 /* Bandeau d'étoiles — haut droite, pointe en bas (ref HS).
-   v1 : l'étoile shiny seule. Les étoiles 1-5 de l'instance : DETTE
-   contrat (MemberSetup ne porte pas stars — extension back). Le
-   bandeau est déjà dimensionné pour en empiler 5. */
+   Empile member.stars (1-5). */
 .card-preview__stars {
 	position: absolute;
 	top: -6px;
@@ -384,6 +382,65 @@
 	border-radius: 6px;
 	border: 1px dashed rgb(255 255 255 / 35%);
 	background: rgb(0 0 0 / 20%);
+}
+/* ---------------------------------------------------------------------
+   Raretés — palette transverse (slots combat aujourd'hui ; inventaire,
+   gacha demain). Ne vivent qu'ici tant que seul le combat les lit ;
+   à remonter dans :root (index.css) au premier second consommateur.
+   --------------------------------------------------------------------- */
+
+.combat-page {
+	--rarity-common: #7a7f87;
+	--rarity-rare: #3d7dd4;
+	--rarity-ultra_rare: #8e44c9;
+	--rarity-legendary: #d4952e;
+	--rarity-mythic: #cf3b3b;
+}
+
+/* Slot rempli : fond = rareté, catégorie lisible dedans. Le slot vide
+   garde son pointillé (règle de base .card-preview__item inchangée). */
+.card-preview__item[data-rarity] {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-style: solid;
+	border-color: rgb(255 255 255 / 45%);
+	background: var(--rarity, rgb(0 0 0 / 20%));
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #fff;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+}
+
+.card-preview__item[data-rarity="common"] {
+	--rarity: var(--rarity-common);
+}
+.card-preview__item[data-rarity="rare"] {
+	--rarity: var(--rarity-rare);
+}
+.card-preview__item[data-rarity="ultra_rare"] {
+	--rarity: var(--rarity-ultra_rare);
+}
+.card-preview__item[data-rarity="legendary"] {
+	--rarity: var(--rarity-legendary);
+}
+.card-preview__item[data-rarity="mythic"] {
+	--rarity: var(--rarity-mythic);
+}
+
+/* Détail des items — nom FR · effet, sous les slots */
+.card-preview__item-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	font-size: 12px;
+	text-align: center;
+	opacity: 0.9;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
 }
 
 .card-preview__types {
