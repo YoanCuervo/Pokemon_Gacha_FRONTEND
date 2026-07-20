@@ -23,7 +23,7 @@ export function PlayerBanner({ profile, team, side }: Props) {
 		<div className="player-banner" data-side={side}>
 			<ProfilPicture
 				photoUrl={profile.avatar_url ? photoUrl(profile.avatar_url) : undefined}
-				size={64}
+				size={114}
 			/>
 			<span className="player-banner__name">{profile.display_name}</span>
 			<dl className="player-banner__stats">

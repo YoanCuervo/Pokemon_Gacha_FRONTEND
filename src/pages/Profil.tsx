@@ -45,7 +45,7 @@ function Profil() {
 								activePhoto ? photoUrl(activePhoto.file_path) : undefined
 							}
 							level={user?.level ?? 1}
-							size={180}
+							size={200}
 						/>
 						<div className="profil-stats">infos stats</div>
 					</div>

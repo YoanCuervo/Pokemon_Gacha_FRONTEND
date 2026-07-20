@@ -16,7 +16,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
-	background-color: var(--bg-surface);
+	background-color: var(--bg-raised);
 	border-radius: var(--radius-lg);
 	padding: 2rem;
 }
@@ -34,6 +34,7 @@
 
 .edit-header h2 {
 	font-size: 1.1rem;
+	color: var(--text-muted);
 }
 
 .edit-close {
@@ -90,7 +91,7 @@
 
 .edit-slot-empty:hover {
 	border-color: var(--border-strong);
-	background-color: var(--bg-hover);
+	background-color: var(--bg-hover-gold);
 }
 
 .edit-slot-delete {
@@ -117,20 +118,29 @@
 
 .edit-flag-btn {
 	padding: 0.8rem 1.5rem;
-	background-color: var(--bg-raised);
+	background-color: var(--bg-surface);
 	border-radius: var(--radius);
-	color: var(--text-main);
+	color: var(--text-second);
 	font-size: 0.9rem;
 	text-decoration: none;
 }
 
+.edit-flag-btn:hover {
+	background-color: var(--bg-hover-gold);
+	font-weight: 600;
+}
+
 .edit-use {
 	padding: 0.8rem 2rem;
-	background-color: var(--bg-raised);
+	background-color: var(--bg-surface);
 	border: none;
 	border-radius: var(--radius);
-	color: var(--text-main);
+	color: var(--text-second);
 	cursor: pointer;
+}
+.edit-use:hover {
+	background-color: var(--bg-hover-gold);
+	font-weight: 600;
 }
 
 .edit-use:disabled {

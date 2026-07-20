@@ -520,12 +520,12 @@
 
 .player-banner[data-side="top"] {
 	bottom: 100%;
-	margin-bottom: 16px;
+	margin-bottom: 40px;
 }
 
 .player-banner[data-side="bottom"] {
 	top: 100%;
-	margin-top: 16px;
+	margin-top: 40px;
 }
 
 .player-banner__name {
