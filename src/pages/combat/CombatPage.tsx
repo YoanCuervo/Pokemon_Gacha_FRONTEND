@@ -119,6 +119,7 @@ function CombatScreen({ log }: { log: CombatLog }) {
 		>
 			<Battlefield
 				teams={player.setup.teams}
+				profiles={player.setup.profiles}
 				cards={player.cards}
 				myTeamKey={MY_TEAM_KEY}
 				onHover={setHoveredUid}

@@ -488,6 +488,96 @@
 }
 
 /* ---------------------------------------------------------------------
+   PlayerBanner — profil d'un camp, ancré à sa rangée. Hover = stats.
+   RANK/WINRATE placeholders (PVP), VITESSE/ATTAQUE/VIE depuis le setup.
+   --------------------------------------------------------------------- */
+
+.battlefield__row {
+	position: relative; /* ancre le PlayerBanner absolute */
+}
+
+.player-banner {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 16px 6px 6px;
+	border-radius: 40px;
+	background: #14161a;
+	border: 1px solid var(--border-accent);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 45%);
+	white-space: nowrap;
+}
+
+.player-banner[data-side="top"] {
+	bottom: 100%;
+	margin-bottom: 16px;
+}
+
+.player-banner[data-side="bottom"] {
+	top: 100%;
+	margin-top: 16px;
+}
+
+.player-banner__name {
+	font-size: 15px;
+	font-weight: 700;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+}
+
+/* Panneau stats — révélé au hover du badge. CSS pur : le panneau est
+   descendant du badge, le :hover tient tant que le curseur est dessus. */
+.player-banner__stats {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 120;
+	display: none;
+	min-width: 150px;
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: rgb(20 22 26 / 95%);
+	border: 1px solid rgb(255 255 255 / 15%);
+	box-shadow: 0 6px 20px rgb(0 0 0 / 60%);
+	font-size: 12px;
+}
+
+.player-banner:hover .player-banner__stats {
+	display: block;
+}
+
+.player-banner[data-side="top"] .player-banner__stats {
+	bottom: 100%;
+	margin-bottom: 8px;
+}
+
+.player-banner[data-side="bottom"] .player-banner__stats {
+	top: 100%;
+	margin-top: 8px;
+}
+
+.player-banner__stats > div {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 2px 0;
+}
+
+.player-banner__stats dt {
+	opacity: 0.65;
+	letter-spacing: 0.04em;
+}
+
+.player-banner__stats dd {
+	margin: 0;
+	font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------
    Animations d'action — plus sèches, et la charge TOUCHE l'adversaire
    (traverse le gap de 64px + chevauche la rangée d'en face).
    Durée 0.7 x tempo : l'action claque, le battement respire.

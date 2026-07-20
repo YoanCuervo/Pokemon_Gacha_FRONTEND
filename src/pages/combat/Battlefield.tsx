@@ -4,14 +4,22 @@
 // Les cartes "dead" ne sont plus rendues : flexbox resserre les
 // survivantes (transition CSS) — la règle d'adjacence rendue visible.
 // Les "dying" restent rendues (grisées) un battement.
+// Chaque rangée porte le PlayerBanner de son camp (ancré à la rangée).
 // =====================================================================
 
 import type { CardState } from "../../hooks/useCombatPlayer";
-import type { CombatUid, TeamKey, TeamSetup } from "../../types/combat";
+import type {
+	CombatUid,
+	TeamKey,
+	TeamProfile,
+	TeamSetup,
+} from "../../types/combat";
 import { type CardAction, CombatCard } from "./CombatCard";
+import { PlayerBanner } from "./PlayerBanner";
 
 interface RowProps {
 	team: TeamSetup;
+	profile: TeamProfile;
 	cards: Record<CombatUid, CardState>;
 	onHover: (uid: string | null) => void;
 	side: "top" | "bottom";
@@ -22,6 +30,7 @@ interface RowProps {
 
 function TeamRow({
 	team,
+	profile,
 	cards,
 	onHover,
 	side,
@@ -31,6 +40,7 @@ function TeamRow({
 }: RowProps) {
 	return (
 		<div className="battlefield__row" data-side={side}>
+			<PlayerBanner profile={profile} team={team} side={side} />
 			{team.members.map((m) => {
 				const card = cards[m.uid];
 				if (!card || card.status === "dead") return null;
@@ -52,6 +62,7 @@ function TeamRow({
 
 interface Props {
 	teams: { a: TeamSetup; b: TeamSetup };
+	profiles: { a: TeamProfile; b: TeamProfile };
 	cards: Record<CombatUid, CardState>;
 	/** L'équipe du joueur : rendue en BAS. */
 	myTeamKey: TeamKey;
@@ -63,6 +74,7 @@ interface Props {
 
 export function Battlefield({
 	teams,
+	profiles,
 	cards,
 	myTeamKey,
 	onHover,
@@ -75,6 +87,7 @@ export function Battlefield({
 		<div className="battlefield">
 			<TeamRow
 				team={teams[opponentKey]}
+				profile={profiles[opponentKey]}
 				cards={cards}
 				onHover={onHover}
 				side="top"
@@ -84,6 +97,7 @@ export function Battlefield({
 			/>
 			<TeamRow
 				team={teams[myTeamKey]}
+				profile={profiles[myTeamKey]}
 				cards={cards}
 				onHover={onHover}
 				side="bottom"
