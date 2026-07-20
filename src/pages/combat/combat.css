@@ -506,16 +506,16 @@
 	transform: translateX(-50%);
 	z-index: 5;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 10px;
-	width: 150px;
+	gap: 6px;
+	width: 170px;
 	box-sizing: border-box;
-	padding: 6px 16px 6px 6px;
-	border-radius: 40px;
+	padding: 12px 10px;
+	border-radius: 12px;
 	background: #14161a;
 	border: 1px solid var(--border-accent);
 	box-shadow: 0 2px 8px rgb(0 0 0 / 45%);
-	white-space: nowrap;
 }
 
 .player-banner[data-side="top"] {
@@ -529,10 +529,10 @@
 }
 
 .player-banner__name {
-	flex: 1;
-	min-width: 0;
+	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	white-space: nowrap;
 	font-size: 15px;
 	font-weight: 700;
 	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
@@ -541,11 +541,12 @@
 .player-banner__stats {
 	position: absolute;
 	left: 100%;
+	top: 50%;
+	transform: translateY(-50%);
 	margin-left: 8px;
 	z-index: 120;
 	display: none;
 	min-width: 150px;
-	margin-top: 0;
 	padding: 10px 12px;
 	border-radius: 8px;
 	background: rgb(20 22 26 / 95%);
@@ -556,14 +557,6 @@
 
 .player-banner:hover .player-banner__stats {
 	display: block;
-}
-
-.player-banner[data-side="top"] .player-banner__stats {
-	top: 0;
-}
-
-.player-banner[data-side="bottom"] .player-banner__stats {
-	top: 0;
 }
 
 .player-banner__stats > div {
