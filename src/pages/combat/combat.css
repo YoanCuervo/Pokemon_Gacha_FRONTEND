@@ -444,13 +444,15 @@
 }
 
 .card-preview__types {
+	position: absolute;
+	top: 12px;
+	left: 14px;
 	margin: 0;
 	font-size: 12px;
 	text-transform: capitalize;
 	opacity: 0.85;
 }
 
-/* Pastilles du panneau — bordure basse débordante, comme les cartes */
 .card-preview__attaque,
 .card-preview__vie {
 	position: absolute;
@@ -473,6 +475,20 @@
 	left: -10px;
 	background: #2e9e46;
 }
+
+.card-preview__role-icon {
+	position: absolute;
+	bottom: -13px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: 4px;
+	background: #14161a;
+	border: 1px solid rgb(255 255 255 / 25%);
+}
+
 .card-preview__vie {
 	right: -10px;
 	background: #2f6fd0;

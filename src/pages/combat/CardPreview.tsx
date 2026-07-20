@@ -29,6 +29,8 @@ const CATEGORY_LABEL: Record<SetupItem["category"], string> = {
 	spe: "SPE",
 };
 
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export function CardPreview({ member }: Props) {
 	const itemByCategory = (category: SetupItem["category"]) =>
 		member.items.find((item) => item.category === category) ?? null;
@@ -47,10 +49,7 @@ export function CardPreview({ member }: Props) {
 				))}
 			</div>
 			<h2 className="card-preview__name">{pokemonNameFr(member.pokemon_id)}</h2>
-			<p className="card-preview__role">
-				<RoleIcon role={member.role} size={16} />
-				{ROLE_FR[member.role]}
-			</p>
+			<p className="card-preview__role">{ROLE_FR[member.role]}</p>
 			<div className="card-preview__items">
 				{SLOT_CATEGORIES.map((category) => {
 					const item = itemByCategory(category);
@@ -75,13 +74,16 @@ export function CardPreview({ member }: Props) {
 				</ul>
 			)}
 			<p className="card-preview__types">
-				{member.type_primary}
-				{member.type_secondary && ` / ${member.type_secondary}`}
+				{capitalize(member.type_primary)}
+				{member.type_secondary && ` / ${capitalize(member.type_secondary)}`}
 			</p>
 			<div className="card-preview__stats">
 				<span className="card-preview__attaque">{member.attaque}</span>
 				<span className="card-preview__vie">{member.vie_max}</span>
 			</div>
+			<span className="card-preview__role-icon">
+				<RoleIcon role={member.role} size={18} />
+			</span>
 		</aside>
 	);
 }
