@@ -493,7 +493,7 @@
    --------------------------------------------------------------------- */
 
 .battlefield__row {
-	position: relative; /* ancre le PlayerBanner absolute */
+	position: relative;
 }
 
 .player-banner {
@@ -504,6 +504,8 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
+	width: 150px;
+	box-sizing: border-box;
 	padding: 6px 16px 6px 6px;
 	border-radius: 40px;
 	background: #14161a;
@@ -523,17 +525,18 @@
 }
 
 .player-banner__name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	font-size: 15px;
 	font-weight: 700;
 	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
 }
 
-/* Panneau stats — révélé au hover du badge. CSS pur : le panneau est
-   descendant du badge, le :hover tient tant que le curseur est dessus. */
 .player-banner__stats {
 	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
+	right: 0;
 	z-index: 120;
 	display: none;
 	min-width: 150px;
