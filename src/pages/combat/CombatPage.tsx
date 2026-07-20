@@ -110,6 +110,7 @@ function CombatScreen({ log }: { log: CombatLog }) {
 	return (
 		<div
 			className="combat-page"
+			data-finished={player.finished || undefined}
 			style={{
 				["--tempo" as string]: `${player.tempoMs}ms`,
 				["--arena-image" as string]: player.setup

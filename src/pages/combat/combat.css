@@ -4,6 +4,8 @@
    basse, bouton RETOUR stylé + hover, animations plus rapides et
    charge qui atteint la rangée adverse, étoile shiny du hover en
    haut-gauche vertical.
+   MAJ 20/07 : PlayerBanner (badge taille carte, hover à droite du
+   badge, masqué sur l'écran de fin).
    ===================================================================== */
 
 .combat-page {
@@ -490,6 +492,8 @@
 /* ---------------------------------------------------------------------
    PlayerBanner — profil d'un camp, ancré à sa rangée. Hover = stats.
    RANK/WINRATE placeholders (PVP), VITESSE/ATTAQUE/VIE depuis le setup.
+   Le panneau stats sort À DROITE du badge (left: 100%), aligné en haut
+   (top: 0) pour les deux camps. Masqué quand l'écran de fin est affiché.
    --------------------------------------------------------------------- */
 
 .battlefield__row {
@@ -536,11 +540,12 @@
 
 .player-banner__stats {
 	position: absolute;
-	right: 0;
+	left: 100%;
+	margin-left: 8px;
 	z-index: 120;
 	display: none;
 	min-width: 150px;
-	margin: 0;
+	margin-top: 0;
 	padding: 10px 12px;
 	border-radius: 8px;
 	background: rgb(20 22 26 / 95%);
@@ -554,13 +559,11 @@
 }
 
 .player-banner[data-side="top"] .player-banner__stats {
-	bottom: 100%;
-	margin-bottom: 8px;
+	top: 0;
 }
 
 .player-banner[data-side="bottom"] .player-banner__stats {
-	top: 100%;
-	margin-top: 8px;
+	top: 0;
 }
 
 .player-banner__stats > div {
@@ -578,6 +581,12 @@
 .player-banner__stats dd {
 	margin: 0;
 	font-weight: 700;
+}
+
+/* Écran de fin affiché → les banners (hors flux) ne doivent pas le
+   traverser. data-finished posé sur .combat-page par CombatPage. */
+.combat-page[data-finished] .player-banner {
+	display: none;
 }
 
 /* ---------------------------------------------------------------------
