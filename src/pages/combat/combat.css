@@ -1,0 +1,698 @@
+/* =====================================================================
+   pages/combat/combat.css — Écran COMBAT (VERSION DE RÉFÉRENCE 19/07)
+   Corrige : page en fixed (par-dessus le hub), pastilles en bordure
+   basse, bouton RETOUR stylé + hover, animations plus rapides et
+   charge qui atteint la rangée adverse, étoile shiny du hover en
+   haut-gauche vertical.
+   ===================================================================== */
+
+.combat-page {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	overflow-y: auto;
+	--tempo: 800ms;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	padding: 24px;
+	background: #1a1c22 var(--arena-image, none) center / cover no-repeat;
+	color: #fff;
+	--rarity-common: #7a7f87;
+	--rarity-rare: #3d7dd4;
+	--rarity-ultra_rare: #8e44c9;
+	--rarity-legendary: #d4952e;
+	--rarity-mythic: #cf3b3b;
+}
+
+.combat-page__loading,
+.combat-page__error {
+	padding: 48px;
+	text-align: center;
+}
+
+/* ---------------------------------------------------------------------
+   Terrain
+   --------------------------------------------------------------------- */
+
+.battlefield {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 151px;
+	flex: 1;
+}
+
+.battlefield__row {
+	display: flex;
+	justify-content: center;
+	gap: 64px;
+}
+
+/* ---------------------------------------------------------------------
+   Carte
+   --------------------------------------------------------------------- */
+
+.combat-card-slot {
+	display: flex;
+}
+
+.combat-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 150px;
+	padding: 24px 10px 26px;
+	border-radius: 10px;
+	background: var(--type-color, #6b6b6b);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	transition:
+		opacity calc(var(--tempo) * 0.8) ease,
+		transform calc(var(--tempo) * 0.8) ease,
+		filter calc(var(--tempo) * 0.8) ease;
+}
+
+.combat-card[data-status="dying"] {
+	filter: grayscale(1);
+	opacity: 0.35;
+	transform: scale(0.9);
+}
+
+.combat-card__sprite {
+	width: 104px;
+	height: 104px;
+	image-rendering: pixelated;
+}
+
+/* Losange rôle */
+.combat-card__role {
+	position: absolute;
+	top: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	border-radius: 4px;
+	background: #14161a;
+	border: 1px solid rgb(255 255 255 / 25%);
+}
+
+/* Pastilles ATTAQUE / VIE — en bordure basse, débordantes (ref wireframe) */
+.combat-card__attaque,
+.combat-card__vie {
+	position: absolute;
+	bottom: -13px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 26px;
+	padding: 0 6px;
+	border-radius: 13px;
+	color: #fff;
+	font-weight: 700;
+	font-size: 15px;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+	box-shadow: 0 1px 4px rgb(0 0 0 / 50%);
+}
+
+.combat-card__attaque {
+	left: -8px;
+	background: #2e9e46; /* verte, statique (contrat §11) */
+}
+
+.combat-card__vie {
+	right: -8px;
+	background: #2f6fd0; /* bleue, vivante */
+}
+
+/* ---------------------------------------------------------------------
+   Couleurs par type (fond ; deviendront le fallback des images)
+   --------------------------------------------------------------------- */
+
+.combat-card[data-type="normal"],
+.card-preview[data-type="normal"] {
+	--type-color: #8a8a6d;
+}
+.combat-card[data-type="fire"],
+.card-preview[data-type="fire"] {
+	--type-color: #c4552e;
+}
+.combat-card[data-type="water"],
+.card-preview[data-type="water"] {
+	--type-color: #4a70c9;
+}
+.combat-card[data-type="electric"],
+.card-preview[data-type="electric"] {
+	--type-color: #c9a325;
+}
+.combat-card[data-type="grass"],
+.card-preview[data-type="grass"] {
+	--type-color: #5a9938;
+}
+.combat-card[data-type="ice"],
+.card-preview[data-type="ice"] {
+	--type-color: #6fb8b6;
+}
+.combat-card[data-type="fighting"],
+.card-preview[data-type="fighting"] {
+	--type-color: #a3302a;
+}
+.combat-card[data-type="poison"],
+.card-preview[data-type="poison"] {
+	--type-color: #8a3d8a;
+}
+.combat-card[data-type="ground"],
+.card-preview[data-type="ground"] {
+	--type-color: #b3985a;
+}
+.combat-card[data-type="flying"],
+.card-preview[data-type="flying"] {
+	--type-color: #8578c9;
+}
+.combat-card[data-type="psychic"],
+.card-preview[data-type="psychic"] {
+	--type-color: #d0487c;
+}
+.combat-card[data-type="bug"],
+.card-preview[data-type="bug"] {
+	--type-color: #8a9a25;
+}
+.combat-card[data-type="rock"],
+.card-preview[data-type="rock"] {
+	--type-color: #9a8838;
+}
+.combat-card[data-type="ghost"],
+.card-preview[data-type="ghost"] {
+	--type-color: #5c548a;
+}
+.combat-card[data-type="dragon"],
+.card-preview[data-type="dragon"] {
+	--type-color: #5d3fc9;
+}
+.combat-card[data-type="dark"],
+.card-preview[data-type="dark"] {
+	--type-color: #5a4a3d;
+}
+.combat-card[data-type="steel"],
+.card-preview[data-type="steel"] {
+	--type-color: #8a8a9a;
+}
+
+/* ---------------------------------------------------------------------
+   Contrôles
+   --------------------------------------------------------------------- */
+
+.combat-controls {
+	position: fixed;
+	left: 24px;
+	bottom: 24px;
+	display: flex;
+	gap: 12px;
+}
+
+.combat-controls button {
+	display: flex;
+	align-items: center;
+	padding: 8px 20px;
+	border: 1px solid rgb(255 255 255 / 30%);
+	border-radius: 6px;
+	background: #2a2d35;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.combat-controls button:hover:not(:disabled) {
+	background: #3a3e48;
+}
+
+.combat-controls button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.combat-controls__speed[aria-pressed="true"] {
+	background: #2e9e46;
+	border-color: #2e9e46;
+}
+
+/* ---------------------------------------------------------------------
+   Écran de fin
+   --------------------------------------------------------------------- */
+
+.combat-result {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column; /* RETOUR SOUS le titre, pas à côté */
+	gap: 24px;
+	align-items: center;
+	justify-content: center;
+	background: rgb(0 0 0 / 75%);
+	backdrop-filter: blur(6px);
+	animation: result-in 400ms ease both;
+}
+
+.combat-result h1 {
+	margin: 0;
+	font-size: 64px;
+	letter-spacing: 0.1em;
+}
+
+.combat-result__back {
+	padding: 10px 32px;
+	border: 1px solid rgb(255 255 255 / 30%);
+	border-radius: 6px;
+	background: #2a2d35;
+	color: #fff;
+	text-decoration: none;
+	letter-spacing: 0.08em;
+}
+
+.combat-result__back:hover {
+	background: #3a3e48;
+}
+
+.combat-result[data-outcome="VICTOIRE"] h1 {
+	color: #4cd964;
+}
+.combat-result[data-outcome="DÉFAITE"] h1 {
+	color: #e0453a;
+}
+.combat-result[data-outcome="ÉGALITÉ"] h1 {
+	color: #c9c9c9;
+}
+
+@keyframes result-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* ---------------------------------------------------------------------
+   Hover carte — panneau fiche d'identité (droite)
+   --------------------------------------------------------------------- */
+
+.card-preview {
+	position: fixed;
+	top: 50%;
+	right: 160px;
+	transform: translateY(-50%);
+	z-index: 150;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	width: 240px;
+	padding: 24px 16px 30px; /* bas : place pour les pastilles débordantes */
+	border-radius: 14px;
+	background: var(--type-color, #2a2d35);
+	box-shadow: 0 6px 24px rgb(0 0 0 / 60%);
+	pointer-events: none;
+	animation: preview-in 120ms ease both;
+}
+
+@keyframes preview-in {
+	from {
+		opacity: 0;
+		transform: translateY(-50%) translateX(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(-50%) translateX(0);
+	}
+}
+
+/* Bandeau d'étoiles — haut droite, pointe en bas (ref HS).
+   Empile member.stars (1-5). */
+.card-preview__stars {
+	position: absolute;
+	top: -6px;
+	right: 14px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 10px 7px 16px;
+	background: rgb(20 22 26 / 85%);
+	border: 1px solid rgb(255 215 94 / 45%);
+	border-top: none;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% calc(100% - 9px),
+		50% 100%,
+		0 calc(100% - 9px)
+	);
+	font-size: 18px;
+	line-height: 1;
+	color: #ffd75e;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+.card-preview__sprite {
+	width: 150px;
+	height: 150px;
+	object-fit: contain; /* artwork PNG : proportions libres, pas pixelated */
+}
+
+.card-preview__name {
+	margin: 0;
+	font-size: 22px;
+	text-shadow: 0 2px 4px rgb(0 0 0 / 50%);
+}
+
+.card-preview__role {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.card-preview__items {
+	display: flex;
+	gap: 8px;
+}
+
+.card-preview__item {
+	width: 36px;
+	height: 36px;
+	border-radius: 6px;
+	border: 1px dashed rgb(255 255 255 / 35%);
+	background: rgb(0 0 0 / 20%);
+}
+/* Slot rempli : fond = rareté, catégorie lisible dedans. Le slot vide
+   garde son pointillé (règle de base .card-preview__item inchangée). */
+.card-preview__item[data-rarity] {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-style: solid;
+	border-color: rgb(255 255 255 / 45%);
+	background: var(--rarity, rgb(0 0 0 / 20%));
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #fff;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+}
+
+.card-preview__item[data-rarity="common"] {
+	--rarity: var(--rarity-common);
+}
+.card-preview__item[data-rarity="rare"] {
+	--rarity: var(--rarity-rare);
+}
+.card-preview__item[data-rarity="ultra_rare"] {
+	--rarity: var(--rarity-ultra_rare);
+}
+.card-preview__item[data-rarity="legendary"] {
+	--rarity: var(--rarity-legendary);
+}
+.card-preview__item[data-rarity="mythic"] {
+	--rarity: var(--rarity-mythic);
+}
+
+/* Détail des items — nom FR · effet, sous les slots */
+.card-preview__item-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	font-size: 12px;
+	text-align: center;
+	opacity: 0.9;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+}
+
+.card-preview__types {
+	position: absolute;
+	top: 12px;
+	left: 14px;
+	margin: 0;
+	font-size: 12px;
+	text-transform: capitalize;
+	opacity: 0.85;
+}
+
+.card-preview__attaque,
+.card-preview__vie {
+	position: absolute;
+	bottom: -17px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	height: 34px;
+	padding: 0 10px;
+	border-radius: 17px;
+	font-weight: 700;
+	font-size: 19px;
+	color: #fff;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+	box-shadow: 0 2px 6px rgb(0 0 0 / 50%);
+}
+
+.card-preview__attaque {
+	left: -10px;
+	background: #2e9e46;
+}
+
+.card-preview__role-icon {
+	position: absolute;
+	bottom: -13px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: 4px;
+	background: #14161a;
+	border: 1px solid rgb(255 255 255 / 25%);
+}
+
+.card-preview__vie {
+	right: -10px;
+	background: #2f6fd0;
+}
+
+/* ---------------------------------------------------------------------
+   Animations d'action — plus sèches, et la charge TOUCHE l'adversaire
+   (traverse le gap de 64px + chevauche la rangée d'en face).
+   Durée 0.7 x tempo : l'action claque, le battement respire.
+   --------------------------------------------------------------------- */
+
+.combat-card[data-action="attacking"] {
+	z-index: 10;
+}
+
+/* Charge DIRIGEE vers la cible : --dx/--dy poses par CombatCard
+   (mesure des positions reelles au moment de l'action). La meme
+   keyframe sert aux deux rangees : le vecteur porte la direction. */
+.combat-card[data-action="attacking"] {
+	animation: charge calc(var(--tempo) * 0.7) cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+
+/* fonce (45%), impact au contact de la cible, revient */
+@keyframes charge {
+	0% {
+		transform: translate(0, 0);
+	}
+	45% {
+		transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.06);
+	}
+	58% {
+		transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.06);
+	}
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+/* encaisser : secousse + flash à l'impact (~45%) */
+.combat-card[data-action="hit"] {
+	animation: take-hit calc(var(--tempo) * 0.7) ease-out both;
+}
+
+@keyframes take-hit {
+	0%,
+	42% {
+		transform: translateX(0);
+		filter: none;
+	}
+	48% {
+		transform: translateX(-7px);
+		filter: brightness(2);
+	}
+	56% {
+		transform: translateX(6px);
+		filter: brightness(1.6);
+	}
+	64% {
+		transform: translateX(-3px);
+		filter: brightness(1.2);
+	}
+	74%,
+	100% {
+		transform: translateX(0);
+		filter: none;
+	}
+}
+
+/* crit : flash rouge violent */
+.combat-card[data-action="hit-crit"] {
+	animation: take-crit calc(var(--tempo) * 0.7) ease-out both;
+}
+
+@keyframes take-crit {
+	0%,
+	42% {
+		transform: translateX(0) scale(1);
+		filter: none;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+	48% {
+		transform: translateX(-10px) scale(1.05);
+		filter: brightness(2.4) saturate(1.5);
+		box-shadow: 0 0 24px rgb(255 60 40 / 90%);
+	}
+	58% {
+		transform: translateX(9px) scale(1.03);
+		filter: brightness(1.9);
+		box-shadow: 0 0 16px rgb(255 60 40 / 70%);
+	}
+	68% {
+		transform: translateX(-4px) scale(1);
+		filter: brightness(1.3);
+		box-shadow: 0 0 8px rgb(255 60 40 / 40%);
+	}
+	80%,
+	100% {
+		transform: translateX(0);
+		filter: none;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+}
+
+/* soigner : demi-pas + aura verte */
+[data-side="bottom"] .combat-card[data-action="healing"] {
+	animation: heal-cast-up calc(var(--tempo) * 0.7) ease-in-out both;
+}
+
+[data-side="top"] .combat-card[data-action="healing"] {
+	animation: heal-cast-down calc(var(--tempo) * 0.7) ease-in-out both;
+}
+
+@keyframes heal-cast-up {
+	0% {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+	40% {
+		transform: translateY(-20px);
+		box-shadow: 0 0 24px rgb(80 220 120 / 85%);
+	}
+	60% {
+		transform: translateY(-20px);
+		box-shadow: 0 0 24px rgb(80 220 120 / 85%);
+	}
+	100% {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+}
+
+@keyframes heal-cast-down {
+	0% {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+	40% {
+		transform: translateY(20px);
+		box-shadow: 0 0 24px rgb(80 220 120 / 85%);
+	}
+	60% {
+		transform: translateY(20px);
+		box-shadow: 0 0 24px rgb(80 220 120 / 85%);
+	}
+	100% {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+}
+
+/* Feedback pastille VIE : elle grossit/clignote quand la valeur change
+   — l'oeil est guide vers le chiffre qui bouge. */
+.combat-card[data-action="healed"] .combat-card__vie,
+.combat-card[data-action="healing"] .combat-card__vie {
+	animation: vie-pulse-heal calc(var(--tempo) * 0.7) ease-out both;
+}
+
+.combat-card[data-action="hit"] .combat-card__vie,
+.combat-card[data-action="hit-crit"] .combat-card__vie {
+	animation: vie-pulse-hit calc(var(--tempo) * 0.7) ease-out both;
+}
+
+@keyframes vie-pulse-heal {
+	0%,
+	40% {
+		transform: scale(1);
+		background: #2f6fd0;
+	}
+	55% {
+		transform: scale(1.35);
+		background: #2e9e46;
+	}
+	100% {
+		transform: scale(1);
+		background: #2f6fd0;
+	}
+}
+
+@keyframes vie-pulse-hit {
+	0%,
+	42% {
+		transform: scale(1);
+		background: #2f6fd0;
+	}
+	52% {
+		transform: scale(1.35);
+		background: #d03a2e;
+	}
+	100% {
+		transform: scale(1);
+		background: #2f6fd0;
+	}
+}
+
+/* être soigné : lueur verte douce */
+.combat-card[data-action="healed"] {
+	animation: receive-heal calc(var(--tempo) * 0.7) ease-out both;
+}
+
+@keyframes receive-heal {
+	0%,
+	38% {
+		filter: none;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+	52% {
+		filter: brightness(1.35) hue-rotate(-10deg);
+		box-shadow: 0 0 18px rgb(80 220 120 / 80%);
+	}
+	100% {
+		filter: none;
+		box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	}
+}

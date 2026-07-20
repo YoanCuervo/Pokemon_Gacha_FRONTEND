@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router";
 import { TeamProvider } from "./context/TeamContext";
 import { UserProvider } from "./context/UserContext";
+import { CombatPage } from "./pages/combat/CombatPage";
 import EditProfil from "./pages/EditProfil";
 import FlagPicker from "./pages/FlagPicker";
 import Home from "./pages/Home";
@@ -15,6 +16,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={null} />
 					<Route path="/team" element={<Team />} />
+					<Route path="/combat" element={<CombatPage />} />
 					<Route path="/profil" element={<Profil />}>
 						<Route path="edit" element={<EditProfil />}>
 							<Route path="flag" element={<FlagPicker />} />
