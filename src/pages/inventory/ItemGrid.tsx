@@ -8,7 +8,8 @@ interface ItemGridProps {
 	onEquip: (itemInstanceId: number) => void;
 }
 
-const GRID_SIZE = 15;
+// 3 lignes de 7 colonnes = plancher visuel ; au-delà, la grille scrolle.
+const MIN_CELLS = 21;
 
 export function ItemGrid({
 	items,
@@ -16,9 +17,10 @@ export function ItemGrid({
 	pokemonTypeSecondary,
 	onEquip,
 }: ItemGridProps) {
-	// Cellules avec clé stable : l'id de l'item si présent, sinon une clé
-	// de position fixe (les cases vides ne bougent jamais).
-	const cells = Array.from({ length: GRID_SIZE }, (_, i) => ({
+	// Au moins MIN_CELLS cases (grille pleine même avec peu d'items), et
+	// autant que d'items au-delà (le conteneur scrolle via max-height CSS).
+	const cellCount = Math.max(MIN_CELLS, items.length);
+	const cells = Array.from({ length: cellCount }, (_, i) => ({
 		key: items[i] ? `item-${items[i].id}` : `empty-${i}`,
 		item: items[i] ?? null,
 	}));

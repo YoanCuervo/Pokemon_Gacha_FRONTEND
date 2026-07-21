@@ -12,6 +12,8 @@ interface PokemonPanelProps {
 	onPrimaryAction: () => void;
 }
 
+const MAX_STARS = 5;
+
 export function PokemonPanel({
 	instance,
 	equipped,
@@ -25,13 +27,10 @@ export function PokemonPanel({
 	const left: ItemCategory[] = ["att", "spe"];
 	const right: ItemCategory[] = ["def", "speed"];
 
-	// Item present dans le slot selectionne ? -> decide le label du bouton.
 	const selectedSlotItem = selectedCategory
 		? (slotByCategory(selectedCategory)?.item ?? null)
 		: null;
 
-	// Label dynamique : rien selectionne -> desactive ; slot vide -> ANNULER ;
-	// slot rempli -> DESEQUIPER.
 	const primaryLabel = selectedSlotItem ? "DÉSÉQUIPER" : "ANNULER";
 	const primaryDisabled = selectedCategory === null;
 
@@ -53,29 +52,43 @@ export function PokemonPanel({
 			<div className="inventory__slots-wrap">
 				<div className="inventory__slots">{left.map(renderSlot)}</div>
 
-				{/* Card pokémon : type + nom + png + niveau + étoiles UNIQUEMENT */}
-				<div className="inventory__card">
+				<div className="inventory__card" data-type={instance.type_primary}>
+					{/* Type en haut-gauche (anticipe l'homogénéité avec combat) */}
+					<div className="inventory__card-types">
+						<TypeBadge type={instance.type_primary} />
+						{instance.type_secondary && (
+							<TypeBadge type={instance.type_secondary} />
+						)}
+					</div>
+
+					{/* Bandeau d'étoiles haut-droite, pleines → vides */}
+					<div className="inventory__stars">
+						{Array.from({ length: MAX_STARS }, (_, i) => (
+							<span
+								// biome-ignore lint/suspicious/noArrayIndexKey: liste figée de 5 crans
+								key={i}
+								className={
+									i < instance.stars
+										? "inventory__star"
+										: "inventory__star inventory__star--empty"
+								}
+							>
+								★
+							</span>
+						))}
+					</div>
+
 					<img
 						src={artworkUrl(instance.pokemon_id, instance.is_shiny)}
 						alt={instance.name}
 						className="inventory__artwork"
 					/>
 					<div className="inventory__card-info">
-						<div className="inventory__identity">
-							<TypeBadge type={instance.type_primary} />
-							{instance.type_secondary && (
-								<TypeBadge type={instance.type_secondary} />
-							)}
-							<span className="inventory__name">
-								{pokemonNameFr(instance.pokemon_id)}
-								{instance.is_shiny && (
-									<span className="inventory__shiny">★</span>
-								)}
-							</span>
-						</div>
-						<span className="inventory__meta">
-							Nv {instance.level} — {"★".repeat(instance.stars)}
+						<span className="inventory__name">
+							{pokemonNameFr(instance.pokemon_id)}
+							{instance.is_shiny && <span className="inventory__shiny">★</span>}
 						</span>
+						<span className="inventory__level">Nv {instance.level}</span>
 					</div>
 				</div>
 

@@ -1,6 +1,7 @@
 /* =====================================================================
-   INVENTAIRE — card pokémon isolée, slots externes, rareté sur slot
-   rempli, filtres dans le grid, hover card sur items.
+   INVENTAIRE — layout équilibré (5fr/7fr), boutons alignés via flex
+   (les 2 colonnes stretch + margin-top:auto), card affinée, type
+   haut-gauche, étoiles haut-droite, grille entre-deux, filter lisible.
    ===================================================================== */
 
 .inventory-overlay {
@@ -34,8 +35,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	border-bottom: 1px solid var(--border-accent);
-	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--border-strong);
+	padding-bottom: 2rem;
 }
 
 .inventory-header h1 {
@@ -44,10 +45,6 @@
 }
 
 .inventory-close {
-	color: var(--text-muted);
-}
-
-.inventory-close:hover {
 	color: var(--text-second);
 }
 
@@ -57,11 +54,14 @@
 	padding: 3rem;
 }
 
+/* Deux colonnes équilibrées, même hauteur (stretch) */
 .inventory {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 5fr 7fr;
 	gap: 2.5rem;
 	flex: 1;
+	align-items: stretch;
+	padding-top: 42px;
 }
 
 /* ---------- Panneau gauche ---------- */
@@ -69,37 +69,83 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
+	height: 100%;
 }
 
-/* Slots à gauche/droite + card au centre */
 .inventory__slots-wrap {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
 	align-items: center;
-	gap: 1rem;
+	justify-content: center;
+	gap: 1.5rem;
+	padding-top: 60px;
 }
 
 .inventory__slots {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	gap: 2.5rem;
 }
 
-/* Card pokémon : uniquement type/nom/png/niveau/étoiles */
+/* Card pokémon : fond doré, type haut-gauche, étoiles haut-droite */
 .inventory__card {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 0.75rem;
-	padding: 1.5rem;
+	gap: 1rem;
+	width: 100%;
+	max-width: 300px;
+	padding: 2.5rem 1.5rem 2.25rem;
 	background-color: var(--bg-hover-gold);
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-lg);
 }
 
+.inventory__card-types {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	display: flex;
+	gap: 0.35rem;
+}
+
+/* Bandeau d'étoiles — vertical, pointe en bas, doré (repris de combat) */
+.inventory__stars {
+	position: absolute;
+	top: -6px;
+	right: 16px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 10px 7px 16px;
+	background: rgb(20 22 26 / 85%);
+	border: 1px solid rgb(255 215 94 / 45%);
+	border-top: none;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% calc(100% - 9px),
+		50% 100%,
+		0 calc(100% - 9px)
+	);
+	font-size: 16px;
+	line-height: 1;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+.inventory__star {
+	color: #ffd75e;
+}
+
+.inventory__star--empty {
+	color: rgb(255 215 94 / 25%);
+}
+
 .inventory__artwork {
 	width: 100%;
-	max-width: 180px;
+	max-width: 190px;
 	height: auto;
 	object-fit: contain;
 }
@@ -111,16 +157,8 @@
 	gap: 0.4rem;
 }
 
-.inventory__identity {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	flex-wrap: wrap;
-	justify-content: center;
-}
-
 .inventory__name {
-	font-size: 1.2rem;
+	font-size: 1.15rem;
 	color: var(--text-second);
 	font-weight: 700;
 }
@@ -130,11 +168,12 @@
 	margin-left: 0.3rem;
 }
 
-.inventory__meta {
-	font-size: 0.9rem;
+.inventory__level {
+	font-size: 0.85rem;
 	color: var(--text-second);
 }
 
+/* Boutons gauche : poussés en bas de la colonne (alignement) */
 .inventory__actions {
 	display: flex;
 	gap: 1rem;
@@ -162,11 +201,11 @@
 	cursor: not-allowed;
 }
 
-/* ---------- Slot d'équipement (rareté en fond quand rempli) ---------- */
+/* ---------- Slots d'équipement (GRANDS, autour du pokémon) ---------- */
 .equip-slot {
 	position: relative;
-	width: 64px;
-	height: 64px;
+	width: 96px;
+	height: 96px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -187,7 +226,6 @@
 	outline-offset: 1px;
 }
 
-/* Rareté = fond du slot rempli (data-rarity posé par le composant) */
 .equip-slot[data-rarity="common"] {
 	background-color: var(--rarity-common);
 }
@@ -205,14 +243,14 @@
 }
 
 .equip-slot__icon {
-	width: 48px;
-	height: 48px;
+	width: 72px;
+	height: 72px;
 	object-fit: contain;
 	image-rendering: pixelated;
 }
 
 .equip-slot__label {
-	font-size: 0.7rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.05em;
 }
@@ -222,6 +260,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+	height: 100%;
 }
 
 .inventory__tabs {
@@ -261,18 +300,21 @@
 	border-radius: var(--radius-lg);
 }
 
+/* Contenu d'onglet : s'étire, pousse ses boutons en bas (alignement) */
 .inventory__tab-content {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
+	flex: 1;
+	padding-bottom: 170px;
 }
 
 /* ---------- Conteneur grille : filtres DANS le bloc ---------- */
 .inventory__grid-wrap {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-	padding: 1rem;
+	gap: 1rem;
+	padding: 1.25rem;
 	background-color: var(--bg-raised);
 	border: 1px solid var(--border-accent);
 	border-radius: var(--radius-lg);
@@ -287,31 +329,45 @@
 .inventory__filter {
 	display: flex;
 	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.inventory__filter-label {
 	font-size: 0.7rem;
-	color: var(--text-second);
-	gap: 0.2rem;
+	color: #fff;
+	letter-spacing: 0.03em;
 }
 
-.inventory__filter select {
-	background-color: var(--bg-surface);
-	border: 1px solid var(--border-accent);
+.inventory__select {
+	background-color: var(--bg-hover-gold);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius);
-	color: var(--text-main);
-	padding: 0.3rem;
+	color: var(--text-second);
+	padding: 0.35rem 0.5rem;
 	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.8rem;
 }
 
-/* ---------- Grille fixe 5x3 ---------- */
+.inventory__select option {
+	background-color: #2a1810;
+	color: #f5e6c8;
+	font-weight: 500;
+}
+
+/* ---------- Grille fixe 5x3 (entre-deux : 80px) ---------- */
 .inventory__grid {
 	display: grid;
-	grid-template-columns: repeat(5, 1fr);
-	grid-template-rows: repeat(3, 1fr);
-	gap: 0.75rem;
+	grid-template-columns: repeat(7, 80px);
+	grid-auto-rows: 80px;
+	gap: 1rem;
+	justify-content: center;
+	max-height: 272px;
+	overflow-y: auto;
 }
 
 .item-cell {
 	position: relative;
-	aspect-ratio: 1;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -369,44 +425,68 @@
 	image-rendering: pixelated;
 }
 
-/* ---------- Hover card (tooltip d'item) ---------- */
+/* ---------- Tooltip item (fixed : jamais coupé par l'overflow grille) ---------- */
 .item-tooltip {
-	position: absolute;
-	bottom: calc(100% + 6px);
-	left: 50%;
-	transform: translateX(-50%);
-	min-width: 160px;
-	display: none;
+	position: fixed;
+	z-index: 200;
+	min-width: 150px;
+	max-width: 220px;
+	display: flex;
 	flex-direction: column;
-	gap: 0.2rem;
-	padding: 0.6rem 0.75rem;
-	background-color: var(--bg-surface);
+	gap: 0.25rem;
+	padding: 0.7rem 0.85rem;
+	background-color: #2a1810;
 	border: 1px solid var(--border-strong);
+	border-left: 4px solid var(--border-strong);
 	border-radius: var(--radius);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-	z-index: 20;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 	pointer-events: none;
-	text-align: left;
 }
 
-.item-cell:hover .item-tooltip {
-	display: flex;
+/* Bord gauche coloré par rareté */
+.item-tooltip[data-rarity="common"] {
+	border-left-color: var(--rarity-common);
+}
+.item-tooltip[data-rarity="rare"] {
+	border-left-color: var(--rarity-rare);
+}
+.item-tooltip[data-rarity="ultra_rare"] {
+	border-left-color: var(--rarity-ultra_rare);
+}
+.item-tooltip[data-rarity="legendary"] {
+	border-left-color: var(--rarity-legendary);
+}
+.item-tooltip[data-rarity="mythic"] {
+	border-left-color: var(--rarity-mythic);
 }
 
 .item-tooltip__name {
 	font-weight: 700;
-	color: var(--text-second);
-	font-size: 0.85rem;
+	color: #f5e6c8;
+	font-size: 0.9rem;
+}
+
+.item-tooltip__cat {
+	font-size: 0.72rem;
+	color: #c9b896;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.item-tooltip__boost {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #ffd75e;
 }
 
 .item-tooltip__line {
 	font-size: 0.72rem;
-	color: var(--text-main);
+	color: #e0d0b0;
 }
-
-/* ---------- Boutons sous la grille ---------- */
+/* Boutons droite : poussés en bas (alignement avec la gauche) */
 .inventory__grid-actions {
 	display: flex;
 	gap: 1rem;
 	justify-content: flex-end;
+	margin-top: auto;
 }

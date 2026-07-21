@@ -1,7 +1,7 @@
-import { itemNameFr } from "../../i18n/items.fr";
-import { typeNameFr } from "../../i18n/type.fr";
+import { useState } from "react";
 import type { ReserveItem } from "../../types";
 import { itemSpriteUrl } from "../../utils/sprites";
+import { ItemTooltip } from "./ItemTooltip";
 
 interface ItemCellProps {
 	item: ReserveItem;
@@ -9,52 +9,38 @@ interface ItemCellProps {
 	onClick: () => void;
 }
 
-const RARITY_LABEL: Record<string, string> = {
-	common: "Commun",
-	rare: "Rare",
-	ultra_rare: "Ultra rare",
-	legendary: "Légendaire",
-	mythic: "Mythique",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-	att: "Attaque",
-	def: "Défense",
-	speed: "Vitesse",
-	spe: "Spécial",
-};
-
 export function ItemCell({ item, incompatible, onClick }: ItemCellProps) {
-	return (
-		<button
-			type="button"
-			className={`item-cell ${incompatible ? "item-cell--incompatible" : ""}`}
-			data-rarity={item.rarity}
-			onClick={onClick}
-		>
-			<img
-				src={itemSpriteUrl(item.name)}
-				alt={item.name}
-				className="item-cell__icon"
-			/>
+	const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
 
-			{/* Hover card : infos de l'item */}
-			<div className="item-tooltip">
-				<span className="item-tooltip__name">{itemNameFr(item.name)}</span>
-				<span className="item-tooltip__line">
-					{CATEGORY_LABEL[item.category] ?? item.category} ·{" "}
-					{RARITY_LABEL[item.rarity] ?? item.rarity}
-				</span>
-				<span className="item-tooltip__line">Boost +{item.boost_value}</span>
-				{item.required_type && (
-					<span className="item-tooltip__line">
-						Type requis : {typeNameFr(item.required_type)}
-					</span>
-				)}
-				{item.mode && (
-					<span className="item-tooltip__line">Effet : {item.mode}</span>
-				)}
-			</div>
-		</button>
+	return (
+		<>
+			<button
+				type="button"
+				className={`item-cell ${incompatible ? "item-cell--incompatible" : ""}`}
+				data-rarity={item.rarity}
+				onClick={onClick}
+				onMouseEnter={(e) => setPos({ x: e.clientX, y: e.clientY })}
+				onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
+				onMouseLeave={() => setPos(null)}
+			>
+				<img
+					src={itemSpriteUrl(item.name)}
+					alt={item.name}
+					className="item-cell__icon"
+				/>
+			</button>
+			{pos && (
+				<ItemTooltip
+					name={item.name}
+					category={item.category}
+					rarity={item.rarity}
+					boost_value={item.boost_value}
+					required_type={item.required_type}
+					mode={item.mode}
+					x={pos.x}
+					y={pos.y}
+				/>
+			)}
+		</>
 	);
 }

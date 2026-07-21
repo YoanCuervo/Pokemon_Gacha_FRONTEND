@@ -15,7 +15,6 @@ const RARITIES: ItemRarity[] = [
 	"mythic",
 ];
 
-// Types Gen 1-2 (18). Le filtre by type cible required_type des items.
 const TYPES = [
 	"normal",
 	"fire",
@@ -46,8 +45,9 @@ export function FilterBar({
 	return (
 		<div className="inventory__filters">
 			<label className="inventory__filter">
-				by type
+				<span className="inventory__filter-label">by type</span>
 				<select
+					className="inventory__select"
 					value={filterType ?? ""}
 					onChange={(e) => onChangeType(e.target.value || null)}
 				>
@@ -61,8 +61,9 @@ export function FilterBar({
 			</label>
 
 			<label className="inventory__filter">
-				by rarity
+				<span className="inventory__filter-label">by rarity</span>
 				<select
+					className="inventory__select"
 					value={filterRarity ?? ""}
 					onChange={(e) => onChangeRarity(e.target.value || null)}
 				>
