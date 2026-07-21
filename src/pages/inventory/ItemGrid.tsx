@@ -17,8 +17,6 @@ export function ItemGrid({
 	pokemonTypeSecondary,
 	onEquip,
 }: ItemGridProps) {
-	// Au moins MIN_CELLS cases (grille pleine même avec peu d'items), et
-	// autant que d'items au-delà (le conteneur scrolle via max-height CSS).
 	const cellCount = Math.max(MIN_CELLS, items.length);
 	const cells = Array.from({ length: cellCount }, (_, i) => ({
 		key: items[i] ? `item-${items[i].id}` : `empty-${i}`,

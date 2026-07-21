@@ -17,8 +17,7 @@
 .inventory-modal {
 	width: min(1400px, 94vw);
 	height: min(820px, 92vh);
-	overflow-y: auto;
-	scrollbar-width: none;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
@@ -221,9 +220,18 @@
 }
 
 .equip-slot--selected {
-	border-color: var(--ok);
-	outline: 2px solid var(--ok);
-	outline-offset: 1px;
+	border-color: #fbc02d;
+	animation: slot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes slot-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.5);
+	}
+	50% {
+		box-shadow: 0 0 12px 3px rgba(251, 192, 45, 0.8);
+	}
 }
 
 .equip-slot[data-rarity="common"] {
@@ -247,6 +255,7 @@
 	height: 72px;
 	object-fit: contain;
 	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 
 .equip-slot__label {
@@ -288,8 +297,8 @@
 }
 
 .inventory__tab--active {
-	outline: 2px solid var(--ok);
-	outline-offset: 1px;
+	border-color: #fbc02d;
+	animation: slot-pulse 1.4s ease-in-out infinite;
 }
 
 .inventory__placeholder {
@@ -306,6 +315,7 @@
 	flex-direction: column;
 	gap: 1rem;
 	flex: 1;
+	min-height: 0;
 	padding-bottom: 170px;
 }
 
@@ -364,6 +374,11 @@
 	justify-content: center;
 	max-height: 272px;
 	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.inventory__grid::-webkit-scrollbar {
+	display: none;
 }
 
 .item-cell {
@@ -382,8 +397,15 @@
 
 .item-cell:hover {
 	border-color: var(--border-strong);
-	transform: scale(1.05);
+	transform: scale(1.08);
 	z-index: 5;
+	box-shadow:
+		0 0 14px rgba(255, 255, 255, 0.25),
+		inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.item-cell:hover .item-cell__icon {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) brightness(1.15);
 }
 
 .item-cell--empty {
@@ -395,6 +417,7 @@
 .item-cell--empty:hover {
 	border-color: var(--border-accent);
 	transform: none;
+	box-shadow: none;
 }
 
 .item-cell[data-rarity="common"] {
@@ -423,6 +446,7 @@
 	height: 70%;
 	object-fit: contain;
 	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 
 /* ---------- Tooltip item (fixed : jamais coupé par l'overflow grille) ---------- */
