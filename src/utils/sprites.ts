@@ -12,3 +12,14 @@ export function artworkUrl(pokemonId: number, isShiny: boolean): string {
 	const variant = isShiny ? "shiny/" : "";
 	return `${SPRITES_BASE}/other/official-artwork/${variant}${pokemonId}.png`;
 }
+
+/** Sprite d'un item (PokeAPI). slug = nom minuscule, apostrophes/points
+ *  retires, espaces -> tirets ("Fire Stone" -> "fire-stone").
+ *  Derive able, jamais stocke — meme principe que les sprites pokemon. */
+export function itemSpriteUrl(itemName: string): string {
+	const slug = itemName
+		.toLowerCase()
+		.replace(/['’.]/g, "")
+		.replace(/\s+/g, "-");
+	return `${SPRITES_BASE.replace("/pokemon", "")}/items/${slug}.png`;
+}
