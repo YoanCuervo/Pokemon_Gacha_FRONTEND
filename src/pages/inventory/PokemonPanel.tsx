@@ -1,3 +1,5 @@
+import { TypeBadge } from "../../components/TypeBadge";
+import { pokemonNameFr } from "../../i18n/pokemon.fr";
 import type { EquipSlot, InstanceIdentity, ItemCategory } from "../../types";
 import { artworkUrl } from "../../utils/sprites";
 import { EquipmentSlot } from "./EquipmentSlot";
@@ -28,9 +30,18 @@ export function PokemonPanel({
 	return (
 		<div className="inventory__panel">
 			<header className="inventory__identity">
-				<span className="inventory__type">{instance.type_primary}</span>
+				<header className="inventory__identity">
+					<TypeBadge type={instance.type_primary} />
+					{instance.type_secondary && (
+						<TypeBadge type={instance.type_secondary} />
+					)}
+					<h2 className="inventory__name">
+						{pokemonNameFr(instance.pokemon_id)}
+						{instance.is_shiny && <span className="inventory__shiny">★</span>}
+					</h2>
+				</header>
 				<h2 className="inventory__name">
-					{instance.name}
+					{pokemonNameFr(instance.pokemon_id)}
 					{instance.is_shiny && <span className="inventory__shiny">★</span>}
 				</h2>
 			</header>

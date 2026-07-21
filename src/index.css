@@ -17,6 +17,33 @@
 	--border-strong: #501d19;
 	--border-accent: #fbc02d;
 
+	/* Rareté */
+	--rarity-common: #6b7280;
+	--rarity-rare: #2563eb;
+	--rarity-ultra_rare: #7c3aed;
+	--rarity-legendary: #d97706;
+	--rarity-mythic: #dc2626;
+
+	/* Types — couleurs officielles Gen, réutilisables (badge, cartes, combat) */
+	--type-normal: #a8a77a;
+	--type-fire: #ee8130;
+	--type-water: #6390f0;
+	--type-electric: #f7d02c;
+	--type-grass: #7ac74c;
+	--type-ice: #96d9d6;
+	--type-fighting: #c22e28;
+	--type-poison: #a33ea1;
+	--type-ground: #e2bf65;
+	--type-flying: #a98ff3;
+	--type-psychic: #f95587;
+	--type-bug: #a6b91a;
+	--type-rock: #b6a136;
+	--type-ghost: #735797;
+	--type-dragon: #6f35fc;
+	--type-dark: #705746;
+	--type-steel: #b7b7ce;
+	--type-fairy: #d685ad;
+
 	/* Accent + sémantique */
 	--accent: #e94f37;
 	--ok: #2ea86e;

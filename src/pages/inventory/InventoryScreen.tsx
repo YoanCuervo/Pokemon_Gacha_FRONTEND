@@ -1,4 +1,6 @@
+import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { getReserve } from "../../services/item.service";
 import {
 	equipItem,
@@ -28,7 +30,6 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 	const [filterType, setFilterType] = useState<string | null>(null);
 	const [filterRarity, setFilterRarity] = useState<string | null>(null);
 
-	// Chargement initial : fiche + reserve en parallele.
 	useEffect(() => {
 		let cancelled = false;
 		setLoad({ status: "loading" });
@@ -51,16 +52,12 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		};
 	}, [instanceId]);
 
-	// Equiper : le back renvoie la fiche a jour (on la prend), puis on
-	// re-fetch la reserve (source de verite unique — cf remplacement
-	// atomique qui peut RENDRE un item a la reserve).
 	async function handleEquip(itemInstanceId: number) {
 		const updated = await equipItem(instanceId, itemInstanceId);
 		setDetail(updated);
 		setReserve(await getReserve());
 	}
 
-	// Desequiper un slot : idem, fiche + reserve re-synchronisees.
 	async function handleUnequip(category: ItemCategory) {
 		const updated = await unequipItem(instanceId, category);
 		setDetail(updated);
@@ -68,12 +65,9 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		if (selectedCategory === category) setSelectedCategory(null);
 	}
 
-	// Type primaire du pokemon : sert au grisage des items incompatibles.
 	const pokemonType = detail?.instance.type_primary ?? null;
 	const pokemonTypeSecondary = detail?.instance.type_secondary ?? null;
 
-	// Liste visible = reserve ∩ categorie-du-slot ∩ type ∩ rarete.
-	// La categorie vient du SLOT selectionne (pas d'un filtre manuel).
 	const visibleItems = useMemo(() => {
 		return reserve.filter((it) => {
 			if (selectedCategory && it.category !== selectedCategory) return false;
@@ -83,42 +77,60 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		});
 	}, [reserve, selectedCategory, filterType, filterRarity]);
 
-	if (load.status === "loading")
-		return <p className="inventory-page__loading">Chargement…</p>;
-	if (load.status === "error")
-		return <p className="inventory-page__error">Erreur : {load.message}</p>;
-	if (!detail) return null;
-
 	return (
-		<div className="inventory">
-			<PokemonPanel
-				instance={detail.instance}
-				equipped={detail.equipped}
-				selectedCategory={selectedCategory}
-				onSelectSlot={setSelectedCategory}
-				onUnequip={handleUnequip}
-			/>
+		<div className="inventory-overlay">
+			<div className="inventory-modal">
+				<header className="inventory-header">
+					<h1>INVENTAIRE</h1>
+					<Link to="/" className="inventory-close">
+						<X size={20} />
+					</Link>
+				</header>
 
-			<div className="inventory__right">
-				<InventoryTabs activeTab={activeTab} onChangeTab={setActiveTab} />
+				{load.status === "loading" && (
+					<p className="inventory__state">Chargement…</p>
+				)}
+				{load.status === "error" && (
+					<p className="inventory__state">Erreur : {load.message}</p>
+				)}
 
-				{activeTab === "equipment" && (
-					<EquipmentTab
-						items={visibleItems}
-						pokemonType={pokemonType}
-						pokemonTypeSecondary={pokemonTypeSecondary}
-						filterType={filterType}
-						filterRarity={filterRarity}
-						onChangeType={setFilterType}
-						onChangeRarity={setFilterRarity}
-						onEquip={handleEquip}
-					/>
-				)}
-				{activeTab === "experience" && (
-					<div className="inventory__placeholder">EXPÉRIENCE — à venir</div>
-				)}
-				{activeTab === "power" && (
-					<div className="inventory__placeholder">PUISSANCE — à venir</div>
+				{load.status === "ready" && detail && (
+					<div className="inventory">
+						<PokemonPanel
+							instance={detail.instance}
+							equipped={detail.equipped}
+							selectedCategory={selectedCategory}
+							onSelectSlot={setSelectedCategory}
+							onUnequip={handleUnequip}
+						/>
+
+						<div className="inventory__right">
+							<InventoryTabs activeTab={activeTab} onChangeTab={setActiveTab} />
+
+							{activeTab === "equipment" && (
+								<EquipmentTab
+									items={visibleItems}
+									pokemonType={pokemonType}
+									pokemonTypeSecondary={pokemonTypeSecondary}
+									filterType={filterType}
+									filterRarity={filterRarity}
+									onChangeType={setFilterType}
+									onChangeRarity={setFilterRarity}
+									onEquip={handleEquip}
+								/>
+							)}
+							{activeTab === "experience" && (
+								<div className="inventory__placeholder">
+									EXPÉRIENCE — à venir
+								</div>
+							)}
+							{activeTab === "power" && (
+								<div className="inventory__placeholder">
+									PUISSANCE — à venir
+								</div>
+							)}
+						</div>
+					</div>
 				)}
 			</div>
 		</div>
