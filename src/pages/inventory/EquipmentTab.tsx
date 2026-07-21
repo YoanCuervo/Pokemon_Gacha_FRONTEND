@@ -37,6 +37,14 @@ export function EquipmentTab({
 				pokemonTypeSecondary={pokemonTypeSecondary}
 				onEquip={onEquip}
 			/>
+			<div className="inventory__grid-actions">
+				<button type="button" className="inventory__btn" disabled>
+					MODIFIER
+				</button>
+				<button type="button" className="inventory__btn" disabled>
+					EQUIPER
+				</button>
+			</div>
 		</div>
 	);
 }

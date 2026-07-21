@@ -8,28 +8,34 @@ interface ItemGridProps {
 	onEquip: (itemInstanceId: number) => void;
 }
 
+const GRID_SIZE = 15;
+
 export function ItemGrid({
 	items,
 	pokemonType,
 	pokemonTypeSecondary,
 	onEquip,
 }: ItemGridProps) {
-	if (items.length === 0) {
-		return <p className="inventory__empty">Aucun item.</p>;
-	}
+	// Cellules avec clé stable : l'id de l'item si présent, sinon une clé
+	// de position fixe (les cases vides ne bougent jamais).
+	const cells = Array.from({ length: GRID_SIZE }, (_, i) => ({
+		key: items[i] ? `item-${items[i].id}` : `empty-${i}`,
+		item: items[i] ?? null,
+	}));
 
 	return (
 		<div className="inventory__grid">
-			{items.map((item) => {
-				// Grisage : item de type incompatible avec le porteur.
-				// required_type null = universel (jamais grisé).
+			{cells.map(({ key, item }) => {
+				if (!item) {
+					return <div key={key} className="item-cell item-cell--empty" />;
+				}
 				const incompatible =
 					item.required_type !== null &&
 					item.required_type !== pokemonType &&
 					item.required_type !== pokemonTypeSecondary;
 				return (
 					<ItemCell
-						key={item.id}
+						key={key}
 						item={item}
 						incompatible={incompatible}
 						onClick={() => onEquip(item.id)}

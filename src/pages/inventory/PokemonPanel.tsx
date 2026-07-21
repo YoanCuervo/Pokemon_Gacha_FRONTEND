@@ -30,16 +30,10 @@ export function PokemonPanel({
 	return (
 		<div className="inventory__panel">
 			<header className="inventory__identity">
-				<header className="inventory__identity">
-					<TypeBadge type={instance.type_primary} />
-					{instance.type_secondary && (
-						<TypeBadge type={instance.type_secondary} />
-					)}
-					<h2 className="inventory__name">
-						{pokemonNameFr(instance.pokemon_id)}
-						{instance.is_shiny && <span className="inventory__shiny">★</span>}
-					</h2>
-				</header>
+				<TypeBadge type={instance.type_primary} />
+				{instance.type_secondary && (
+					<TypeBadge type={instance.type_secondary} />
+				)}
 				<h2 className="inventory__name">
 					{pokemonNameFr(instance.pokemon_id)}
 					{instance.is_shiny && <span className="inventory__shiny">★</span>}
