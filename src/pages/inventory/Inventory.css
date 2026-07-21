@@ -1,35 +1,30 @@
 /* =====================================================================
-   INVENTAIRE — overlay/modal par-dessus Home (calqué sur team-overlay).
-   Système de couleurs unifié :
-     - fond modal        : --bg-surface
-     - texte brut        : --text-second
-     - case/bouton normal: --bg-raised + --text-main + --border-accent
-     - hover / sélection : --bg-hover-gold + --text-second + --border-strong
-   Rareté : variables globales --rarity-* (index.css), sur le FOND des cases.
+   INVENTAIRE — VERSION 2 : léché. Même logique couleur, composition
+   travaillée : hiérarchie, espacements, hover soignés, card identitaire.
    ===================================================================== */
 
-/* ---------- Overlay + modal ---------- */
 .inventory-overlay {
 	position: fixed;
 	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: rgba(0, 0, 0, 0.6);
+	background-color: rgba(0, 0, 0, 0.65);
+	backdrop-filter: blur(2px);
 	z-index: 10;
 }
 
 .inventory-modal {
 	width: min(1400px, 94vw);
-	height: min(800px, 90vh);
+	height: min(820px, 92vh);
 	overflow-y: auto;
 	scrollbar-width: none;
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
+	gap: 2rem;
 	background-color: var(--bg-surface);
 	border-radius: var(--radius-lg);
-	padding: 2rem;
+	padding: 2.5rem;
 }
 
 .inventory-modal::-webkit-scrollbar {
@@ -40,15 +35,23 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	font-size: 1.6rem;
+	border-bottom: 1px solid var(--border-accent);
+	padding-bottom: 1rem;
 }
 
-.inventory-header h1,
-.inventory__name {
+.inventory-header h1 {
 	color: var(--text-second);
+	font-size: 1.8rem;
+	letter-spacing: 0.02em;
+	margin: 0;
 }
 
 .inventory-close {
+	color: var(--text-muted);
+	transition: color 0.15s;
+}
+
+.inventory-close:hover {
 	color: var(--text-second);
 }
 
@@ -58,11 +61,10 @@
 	padding: 3rem;
 }
 
-/* ---------- Corps : deux colonnes ---------- */
 .inventory {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 2rem;
+	gap: 2.5rem;
 	flex: 1;
 }
 
@@ -70,27 +72,20 @@
 .inventory__panel {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.25rem;
 }
 
 .inventory__identity {
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
-}
-
-.inventory__type {
-	padding: 0.2rem 0.6rem;
-	border: 1px solid var(--border-accent);
-	border-radius: var(--radius);
-	font-size: 0.7rem;
-	text-transform: uppercase;
-	color: var(--text-second);
+	gap: 0.6rem;
 }
 
 .inventory__name {
 	font-size: 1.4rem;
 	margin: 0;
+	color: var(--text-second);
+	font-weight: 700;
 }
 
 .inventory__shiny {
@@ -98,13 +93,13 @@
 	margin-left: 0.3rem;
 }
 
-/* Le pokémon dans une card — style "sélectionné" de Team */
+/* Card identitaire : léger fond gold, bord franc, le pokémon respire */
 .inventory__stage {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
 	align-items: center;
-	gap: 1rem;
-	padding: 1.5rem;
+	gap: 1.5rem;
+	padding: 2rem 1.5rem;
 	background-color: var(--bg-hover-gold);
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-lg);
@@ -113,95 +108,103 @@
 .inventory__slots {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
+	gap: 2.5rem;
 }
 
 .inventory__artwork {
 	width: 100%;
-	max-width: 220px;
+	max-width: 210px;
 	height: auto;
 	object-fit: contain;
 	justify-self: center;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
 }
 
 .inventory__meta {
 	text-align: center;
-	font-size: 0.9rem;
+	font-size: 0.95rem;
 	color: var(--text-second);
+	letter-spacing: 0.03em;
 }
 
 .inventory__actions {
 	display: flex;
 	gap: 1rem;
 	justify-content: center;
-	margin-top: 0.5rem;
 }
 
 .inventory__btn {
-	padding: 0.7rem 1.5rem;
+	padding: 0.7rem 1.6rem;
 	background-color: var(--bg-raised);
 	border: 1px solid var(--border-accent);
 	border-radius: var(--radius);
 	color: var(--text-main);
 	font-weight: bold;
+	letter-spacing: 0.03em;
 	cursor: pointer;
+	transition: all 0.15s;
 }
 
 .inventory__btn:hover:not(:disabled) {
 	background-color: var(--bg-hover-gold);
 	border-color: var(--border-strong);
 	color: var(--text-second);
+	transform: translateY(-1px);
 }
 
 .inventory__btn:disabled {
-	opacity: 0.4;
+	opacity: 0.35;
 	cursor: not-allowed;
 }
 
 /* ---------- Slot d'équipement ---------- */
 .equip-slot {
-	width: 64px;
-	height: 64px;
+	width: 68px;
+	height: 68px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--bg-raised);
+	background-color: var(--bg-surface);
 	border: 2px solid var(--border-accent);
 	border-radius: var(--radius);
-	color: var(--text-main);
+	color: var(--text-muted);
 	cursor: pointer;
+	transition: all 0.15s;
 }
 
-.equip-slot:hover,
-.equip-slot--filled,
-.equip-slot--selected {
-	background-color: var(--bg-hover-gold);
+.equip-slot:hover {
 	border-color: var(--border-strong);
-	color: var(--text-second);
+	transform: scale(1.06);
+}
+
+.equip-slot--filled {
+	background-color: var(--bg-raised);
+	border-color: var(--border-strong);
 }
 
 .equip-slot--selected {
-	outline: 2px solid var(--ok);
-	outline-offset: 1px;
+	border-color: var(--ok);
+	box-shadow: 0 0 0 2px var(--ok);
 }
 
 .equip-slot__icon {
-	width: 48px;
-	height: 48px;
+	width: 50px;
+	height: 50px;
 	object-fit: contain;
 	image-rendering: pixelated;
 }
 
 .equip-slot__label {
 	font-size: 0.7rem;
-	font-weight: 500;
+	font-weight: 600;
+	letter-spacing: 0.05em;
 }
 
 /* ---------- Panneau droit ---------- */
 .inventory__right {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.25rem;
 }
 
 .inventory__tabs {
@@ -211,33 +214,42 @@
 
 .inventory__tab {
 	flex: 1;
-	padding: 0.6rem;
+	padding: 0.7rem;
 	background-color: var(--bg-raised);
 	border: 1px solid var(--border-accent);
 	border-radius: var(--radius);
-	color: var(--text-main);
+	color: var(--text-muted);
 	cursor: pointer;
 	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	transition: all 0.15s;
 }
 
-.inventory__tab:hover,
+.inventory__tab:hover {
+	color: var(--text-second);
+	border-color: var(--border-strong);
+}
+
 .inventory__tab--active {
 	background-color: var(--bg-hover-gold);
 	border-color: var(--border-strong);
 	color: var(--text-second);
-}
-
-.inventory__tab--active {
-	outline: 2px solid var(--ok);
-	outline-offset: 1px;
+	box-shadow: 0 0 0 1px var(--ok);
 }
 
 .inventory__placeholder {
-	padding: 3rem;
+	padding: 4rem 3rem;
 	text-align: center;
-	color: var(--text-second);
+	color: var(--text-muted);
 	border: 2px dashed var(--border-accent);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
+}
+
+.inventory__tab-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
 }
 
 /* ---------- Filtres ---------- */
@@ -251,8 +263,9 @@
 	display: flex;
 	flex-direction: column;
 	font-size: 0.7rem;
-	color: var(--text-second);
-	gap: 0.2rem;
+	color: var(--text-muted);
+	gap: 0.25rem;
+	letter-spacing: 0.03em;
 }
 
 .inventory__filter select {
@@ -260,32 +273,25 @@
 	border: 1px solid var(--border-accent);
 	border-radius: var(--radius);
 	color: var(--text-main);
-	padding: 0.3rem;
+	padding: 0.35rem 0.5rem;
 	cursor: pointer;
+	transition: border-color 0.15s;
 }
 
 .inventory__filter select:hover {
-	background-color: var(--bg-hover-gold);
 	border-color: var(--border-strong);
-	color: var(--text-second);
 }
 
-/* ---------- Grille d'items ---------- */
+/* ---------- Grille fixe 5x3 ---------- */
 .inventory__grid {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
-	gap: 0.75rem;
-	padding: 1rem;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 0.85rem;
+	padding: 1.25rem;
 	background-color: var(--bg-raised);
 	border: 1px solid var(--border-accent);
 	border-radius: var(--radius-lg);
-}
-
-.inventory__empty {
-	padding: 2rem;
-	text-align: center;
-	color: var(--text-second);
-	grid-column: 1 / -1;
 }
 
 .item-cell {
@@ -294,20 +300,31 @@
 	align-items: center;
 	justify-content: center;
 	background-color: var(--bg-surface);
-	border: 2px solid var(--border-accent);
+	border: 2px solid transparent;
 	border-radius: var(--radius);
 	cursor: pointer;
 	transition:
-		transform 0.1s,
-		border-color 0.1s;
+		transform 0.12s,
+		box-shadow 0.12s;
 }
 
 .item-cell:hover {
-	border-color: var(--border-strong);
-	transform: scale(1.05);
+	transform: scale(1.08);
+	box-shadow: 0 0 0 2px var(--border-strong);
 }
 
-/* Rareté = fond de la case (variables globales, cf index.css) */
+.item-cell--empty {
+	background-color: transparent;
+	border: 2px dashed var(--border-accent);
+	cursor: default;
+	opacity: 0.4;
+}
+
+.item-cell--empty:hover {
+	transform: none;
+	box-shadow: none;
+}
+
 .item-cell[data-rarity="common"] {
 	background-color: var(--rarity-common);
 }
@@ -325,13 +342,20 @@
 }
 
 .item-cell--incompatible {
-	opacity: 0.35;
+	opacity: 0.3;
 	filter: grayscale(1);
 }
 
 .item-cell__icon {
-	width: 70%;
-	height: 70%;
+	width: 68%;
+	height: 68%;
 	object-fit: contain;
 	image-rendering: pixelated;
+}
+
+/* ---------- Boutons sous la grille ---------- */
+.inventory__grid-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
 }
