@@ -110,6 +110,7 @@ function CombatScreen({ log }: { log: CombatLog }) {
 	return (
 		<div
 			className="combat-page"
+			data-finished={player.finished || undefined}
 			style={{
 				["--tempo" as string]: `${player.tempoMs}ms`,
 				["--arena-image" as string]: player.setup
@@ -119,6 +120,7 @@ function CombatScreen({ log }: { log: CombatLog }) {
 		>
 			<Battlefield
 				teams={player.setup.teams}
+				profiles={player.setup.profiles}
 				cards={player.cards}
 				myTeamKey={MY_TEAM_KEY}
 				onHover={setHoveredUid}

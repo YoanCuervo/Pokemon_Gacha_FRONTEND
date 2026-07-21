@@ -3,7 +3,7 @@ import "./ProfilPicture.css";
 
 type ProfilPictureProps = {
 	photoUrl?: string;
-	level: number;
+	level?: number;
 	size?: number;
 };
 
@@ -18,7 +18,7 @@ function ProfilPicture({ photoUrl, level, size = 120 }: ProfilPictureProps) {
 				)}
 			</div>
 			<img src={frameFree} alt="" className="pp-frame" />
-			<span className="pp-level">{level}</span>
+			{level !== undefined && <span className="pp-level">{level}</span>}
 		</div>
 	);
 }
