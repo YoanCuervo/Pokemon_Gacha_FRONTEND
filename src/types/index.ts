@@ -86,5 +86,51 @@ export type User = {
 	active_avatar_id: number | null;
 };
 
-/** flagcdn : { "fr": "France", "jp": "Japon", ... } */
 export type CountryList = Record<string, string>;
+
+export interface EquipmentItem {
+	id: number;
+	name: string;
+	category: ItemCategory;
+	required_type: string | null;
+	mode: ItemMode | null;
+	boost_value: number;
+	rarity: ItemRarity;
+}
+
+export interface EquipSlot {
+	category: ItemCategory;
+	item: EquipmentItem | null;
+}
+
+export interface InstanceIdentity {
+	instance_id: number;
+	pokemon_id: number;
+	name: string;
+	type_primary: string;
+	type_secondary: string | null;
+	level: number;
+	stars: number;
+	is_shiny: boolean;
+}
+
+export interface InstanceDetail {
+	instance: InstanceIdentity;
+	equipped: EquipSlot[];
+}
+
+export interface ReserveItem {
+	id: number;
+	template_id: number;
+	name: string;
+	category: ItemCategory;
+	required_type: string | null;
+	mode: ItemMode | null;
+	rarity: ItemRarity;
+	boost_value: number;
+	item_level: number;
+}
+
+export interface ReserveResponse {
+	items: ReserveItem[];
+}

@@ -20,11 +20,11 @@
 	padding: 24px;
 	background: #1a1c22 var(--arena-image, none) center / cover no-repeat;
 	color: #fff;
-	--rarity-common: #7a7f87;
-	--rarity-rare: #3d7dd4;
-	--rarity-ultra_rare: #8e44c9;
-	--rarity-legendary: #d4952e;
-	--rarity-mythic: #cf3b3b;
+	--rarity-common: #6b7280;
+	--rarity-rare: #2563eb;
+	--rarity-ultra_rare: #7c3aed;
+	--rarity-legendary: #d97706;
+	--rarity-mythic: #dc2626;
 }
 
 .combat-page__loading,

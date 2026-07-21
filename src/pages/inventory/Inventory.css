@@ -1,0 +1,517 @@
+/* =====================================================================
+   INVENTAIRE — layout équilibré (5fr/7fr), boutons alignés via flex
+   (les 2 colonnes stretch + margin-top:auto), card affinée, type
+   haut-gauche, étoiles haut-droite, grille entre-deux, filter lisible.
+   ===================================================================== */
+
+.inventory-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 10;
+}
+
+.inventory-modal {
+	width: min(1400px, 94vw);
+	height: min(820px, 92vh);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	background-color: var(--bg-surface);
+	border-radius: var(--radius-lg);
+	padding: 2rem;
+}
+
+.inventory-modal::-webkit-scrollbar {
+	display: none;
+}
+
+.inventory-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border-strong);
+	padding-bottom: 2rem;
+}
+
+.inventory-header h1 {
+	color: var(--text-second);
+	margin: 0;
+}
+
+.inventory-close {
+	color: var(--text-second);
+}
+
+.inventory__state {
+	color: var(--text-second);
+	text-align: center;
+	padding: 3rem;
+}
+
+/* Deux colonnes équilibrées, même hauteur (stretch) */
+.inventory {
+	display: grid;
+	grid-template-columns: 5fr 7fr;
+	gap: 2.5rem;
+	flex: 1;
+	align-items: stretch;
+	padding-top: 42px;
+}
+
+/* ---------- Panneau gauche ---------- */
+.inventory__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	height: 100%;
+}
+
+.inventory__slots-wrap {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	padding-top: 60px;
+}
+
+.inventory__slots {
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+}
+
+/* Card pokémon : fond doré, type haut-gauche, étoiles haut-droite */
+.inventory__card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+	max-width: 300px;
+	padding: 2.5rem 1.5rem 2.25rem;
+	background-color: var(--bg-hover-gold);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-lg);
+}
+
+.inventory__card-types {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	display: flex;
+	gap: 0.35rem;
+}
+
+/* Bandeau d'étoiles — vertical, pointe en bas, doré (repris de combat) */
+.inventory__stars {
+	position: absolute;
+	top: -6px;
+	right: 16px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 10px 7px 16px;
+	background: rgb(20 22 26 / 85%);
+	border: 1px solid rgb(255 215 94 / 45%);
+	border-top: none;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% calc(100% - 9px),
+		50% 100%,
+		0 calc(100% - 9px)
+	);
+	font-size: 16px;
+	line-height: 1;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+.inventory__star {
+	color: #ffd75e;
+}
+
+.inventory__star--empty {
+	color: rgb(255 215 94 / 25%);
+}
+
+.inventory__artwork {
+	width: 100%;
+	max-width: 190px;
+	height: auto;
+	object-fit: contain;
+}
+
+.inventory__card-info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.inventory__name {
+	font-size: 1.15rem;
+	color: var(--text-second);
+	font-weight: 700;
+}
+
+.inventory__shiny {
+	color: var(--accent);
+	margin-left: 0.3rem;
+}
+
+.inventory__level {
+	font-size: 0.85rem;
+	color: var(--text-second);
+}
+
+/* Boutons gauche : poussés en bas de la colonne (alignement) */
+.inventory__actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+}
+
+.inventory__btn {
+	padding: 0.7rem 1.5rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.inventory__btn:hover:not(:disabled) {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
+}
+
+.inventory__btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* ---------- Slots d'équipement (GRANDS, autour du pokémon) ---------- */
+.equip-slot {
+	position: relative;
+	width: 96px;
+	height: 96px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bg-raised);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	cursor: pointer;
+}
+
+.equip-slot:hover {
+	border-color: var(--border-strong);
+}
+
+.equip-slot--selected {
+	border-color: #fbc02d;
+	animation: slot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes slot-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.5);
+	}
+	50% {
+		box-shadow: 0 0 12px 3px rgba(251, 192, 45, 0.8);
+	}
+}
+
+.equip-slot[data-rarity="common"] {
+	background-color: var(--rarity-common);
+}
+.equip-slot[data-rarity="rare"] {
+	background-color: var(--rarity-rare);
+}
+.equip-slot[data-rarity="ultra_rare"] {
+	background-color: var(--rarity-ultra_rare);
+}
+.equip-slot[data-rarity="legendary"] {
+	background-color: var(--rarity-legendary);
+}
+.equip-slot[data-rarity="mythic"] {
+	background-color: var(--rarity-mythic);
+}
+
+.equip-slot__icon {
+	width: 72px;
+	height: 72px;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+.equip-slot__label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+}
+
+/* ---------- Panneau droit ---------- */
+.inventory__right {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	height: 100%;
+}
+
+.inventory__tabs {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.inventory__tab {
+	flex: 1;
+	padding: 0.6rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	cursor: pointer;
+	font-size: 0.8rem;
+	font-weight: 600;
+}
+
+.inventory__tab:hover,
+.inventory__tab--active {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
+}
+
+.inventory__tab--active {
+	border-color: #fbc02d;
+	animation: slot-pulse 1.4s ease-in-out infinite;
+}
+
+.inventory__placeholder {
+	padding: 4rem 3rem;
+	text-align: center;
+	color: var(--text-second);
+	border: 2px dashed var(--border-accent);
+	border-radius: var(--radius-lg);
+}
+
+/* Contenu d'onglet : s'étire, pousse ses boutons en bas (alignement) */
+.inventory__tab-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	flex: 1;
+	min-height: 0;
+	padding-bottom: 170px;
+}
+
+/* ---------- Conteneur grille : filtres DANS le bloc ---------- */
+.inventory__grid-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1.25rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius-lg);
+}
+
+.inventory__filters {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	padding-right: 30px;
+}
+
+.inventory__filter {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.inventory__filter-label {
+	font-size: 0.7rem;
+	color: #fff;
+	letter-spacing: 0.03em;
+}
+
+.inventory__select {
+	background-color: var(--bg-hover-gold);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	padding: 0.35rem 0.5rem;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.8rem;
+}
+
+.inventory__select option {
+	background-color: #2a1810;
+	color: #f5e6c8;
+	font-weight: 500;
+}
+
+/* ---------- Grille fixe 5x3 (entre-deux : 80px) ---------- */
+.inventory__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 80px);
+	grid-auto-rows: 80px;
+	gap: 1rem;
+	justify-content: center;
+	max-height: 272px;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.inventory__grid::-webkit-scrollbar {
+	display: none;
+}
+
+.item-cell {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bg-surface);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.item-cell:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.08);
+	z-index: 5;
+	box-shadow:
+		0 0 14px rgba(255, 255, 255, 0.25),
+		inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.item-cell:hover .item-cell__icon {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) brightness(1.15);
+}
+
+.item-cell--empty {
+	background-color: var(--bg-surface);
+	cursor: default;
+	opacity: 0.5;
+}
+
+.item-cell--empty:hover {
+	border-color: var(--border-accent);
+	transform: none;
+	box-shadow: none;
+}
+
+.item-cell[data-rarity="common"] {
+	background-color: var(--rarity-common);
+}
+.item-cell[data-rarity="rare"] {
+	background-color: var(--rarity-rare);
+}
+.item-cell[data-rarity="ultra_rare"] {
+	background-color: var(--rarity-ultra_rare);
+}
+.item-cell[data-rarity="legendary"] {
+	background-color: var(--rarity-legendary);
+}
+.item-cell[data-rarity="mythic"] {
+	background-color: var(--rarity-mythic);
+}
+
+.item-cell--incompatible {
+	opacity: 0.35;
+	filter: grayscale(1);
+}
+
+.item-cell__icon {
+	width: 70%;
+	height: 70%;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* ---------- Tooltip item (fixed : jamais coupé par l'overflow grille) ---------- */
+.item-tooltip {
+	position: fixed;
+	z-index: 200;
+	min-width: 150px;
+	max-width: 220px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 0.7rem 0.85rem;
+	background-color: #2a1810;
+	border: 1px solid var(--border-strong);
+	border-left: 4px solid var(--border-strong);
+	border-radius: var(--radius);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
+}
+
+/* Bord gauche coloré par rareté */
+.item-tooltip[data-rarity="common"] {
+	border-left-color: var(--rarity-common);
+}
+.item-tooltip[data-rarity="rare"] {
+	border-left-color: var(--rarity-rare);
+}
+.item-tooltip[data-rarity="ultra_rare"] {
+	border-left-color: var(--rarity-ultra_rare);
+}
+.item-tooltip[data-rarity="legendary"] {
+	border-left-color: var(--rarity-legendary);
+}
+.item-tooltip[data-rarity="mythic"] {
+	border-left-color: var(--rarity-mythic);
+}
+
+.item-tooltip__name {
+	font-weight: 700;
+	color: #f5e6c8;
+	font-size: 0.9rem;
+}
+
+.item-tooltip__cat {
+	font-size: 0.72rem;
+	color: #c9b896;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.item-tooltip__boost {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #ffd75e;
+}
+
+.item-tooltip__line {
+	font-size: 0.72rem;
+	color: #e0d0b0;
+}
+/* Boutons droite : poussés en bas (alignement avec la gauche) */
+.inventory__grid-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	margin-top: auto;
+}
