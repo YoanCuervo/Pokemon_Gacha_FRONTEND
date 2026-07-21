@@ -25,18 +25,20 @@ export function EquipmentTab({
 }: EquipmentTabProps) {
 	return (
 		<div className="inventory__tab-content">
-			<FilterBar
-				filterType={filterType}
-				filterRarity={filterRarity}
-				onChangeType={onChangeType}
-				onChangeRarity={onChangeRarity}
-			/>
-			<ItemGrid
-				items={items}
-				pokemonType={pokemonType}
-				pokemonTypeSecondary={pokemonTypeSecondary}
-				onEquip={onEquip}
-			/>
+			<div className="inventory__grid-wrap">
+				<FilterBar
+					filterType={filterType}
+					filterRarity={filterRarity}
+					onChangeType={onChangeType}
+					onChangeRarity={onChangeRarity}
+				/>
+				<ItemGrid
+					items={items}
+					pokemonType={pokemonType}
+					pokemonTypeSecondary={pokemonTypeSecondary}
+					onEquip={onEquip}
+				/>
+			</div>
 			<div className="inventory__grid-actions">
 				<button type="button" className="inventory__btn" disabled>
 					MODIFIER

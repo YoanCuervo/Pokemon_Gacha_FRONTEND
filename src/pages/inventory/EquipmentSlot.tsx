@@ -27,6 +27,7 @@ export function EquipmentSlot({
 			className={`equip-slot ${item ? "equip-slot--filled" : ""} ${
 				selected ? "equip-slot--selected" : ""
 			}`}
+			data-rarity={item?.rarity ?? undefined}
 			onClick={onClick}
 		>
 			{item ? (

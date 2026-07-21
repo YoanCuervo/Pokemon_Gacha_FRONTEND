@@ -95,6 +95,7 @@ export interface EquipmentItem {
 	required_type: string | null;
 	mode: ItemMode | null;
 	boost_value: number;
+	rarity: ItemRarity;
 }
 
 export interface EquipSlot {

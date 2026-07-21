@@ -52,17 +52,31 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		};
 	}, [instanceId]);
 
+	// Toggle du tri : re-cliquer le slot deja selectionne annule la selection
+	// (n'affecte JAMAIS l'equipement — le slot ne desequipe pas).
+	function handleSelectSlot(category: ItemCategory) {
+		setSelectedCategory((prev) => (prev === category ? null : category));
+	}
+
+	// Bouton dynamique sous la card :
+	//  - slot selectionne rempli  -> DESEQUIPER (retire l'item)
+	//  - slot selectionne vide    -> ANNULER (annule juste la selection)
+	async function handlePrimaryAction() {
+		if (selectedCategory === null) return;
+		const slot = detail?.equipped.find((s) => s.category === selectedCategory);
+		if (slot?.item) {
+			const updated = await unequipItem(instanceId, selectedCategory);
+			setDetail(updated);
+			setReserve(await getReserve());
+		}
+		// Dans les deux cas on retombe en selection nulle (tri annulé).
+		setSelectedCategory(null);
+	}
+
 	async function handleEquip(itemInstanceId: number) {
 		const updated = await equipItem(instanceId, itemInstanceId);
 		setDetail(updated);
 		setReserve(await getReserve());
-	}
-
-	async function handleUnequip(category: ItemCategory) {
-		const updated = await unequipItem(instanceId, category);
-		setDetail(updated);
-		setReserve(await getReserve());
-		if (selectedCategory === category) setSelectedCategory(null);
 	}
 
 	const pokemonType = detail?.instance.type_primary ?? null;
@@ -100,8 +114,8 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 							instance={detail.instance}
 							equipped={detail.equipped}
 							selectedCategory={selectedCategory}
-							onSelectSlot={setSelectedCategory}
-							onUnequip={handleUnequip}
+							onSelectSlot={handleSelectSlot}
+							onPrimaryAction={handlePrimaryAction}
 						/>
 
 						<div className="inventory__right">
