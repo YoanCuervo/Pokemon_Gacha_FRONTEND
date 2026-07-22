@@ -134,3 +134,26 @@ export interface ReserveItem {
 export interface ReserveResponse {
 	items: ReserveItem[];
 }
+
+export interface EvolutionInfo {
+	instance_id: number;
+	current: { pokemon_id: number; name: string };
+	target: { pokemon_id: number; name: string } | null;
+	stone: { id: number; name: string; type: string } | null;
+	stone_cost: number | null;
+	stones_owned: number;
+	is_shiny_evolution: boolean;
+	can_evolve: boolean;
+}
+
+/** Une pierre possedee. quantity peut valoir 0 (pot vide). */
+export interface UserStone {
+	stone_id: number;
+	name: string;
+	type: string;
+	quantity: number;
+}
+
+export interface StonesResponse {
+	stones: UserStone[];
+}

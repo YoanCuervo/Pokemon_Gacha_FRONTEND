@@ -9,7 +9,11 @@ interface PokemonPanelProps {
 	equipped: EquipSlot[];
 	selectedCategory: ItemCategory | null;
 	onSelectSlot: (category: ItemCategory) => void;
-	onPrimaryAction: () => void;
+	/** Contenu sous la card : compose par InventoryScreen selon l'onglet
+	 *  actif (boutons equipement en C, compteur + EVOLUER en A...).
+	 *  Le panel reste agnostique : il affiche ce qu'on lui donne, il ne
+	 *  connait pas les regles des onglets. */
+	footer: React.ReactNode;
 }
 
 const MAX_STARS = 5;
@@ -19,20 +23,13 @@ export function PokemonPanel({
 	equipped,
 	selectedCategory,
 	onSelectSlot,
-	onPrimaryAction,
+	footer,
 }: PokemonPanelProps) {
 	const slotByCategory = (cat: ItemCategory) =>
 		equipped.find((s) => s.category === cat);
 
 	const left: ItemCategory[] = ["att", "spe"];
 	const right: ItemCategory[] = ["def", "speed"];
-
-	const selectedSlotItem = selectedCategory
-		? (slotByCategory(selectedCategory)?.item ?? null)
-		: null;
-
-	const primaryLabel = selectedSlotItem ? "DÉSÉQUIPER" : "ANNULER";
-	const primaryDisabled = selectedCategory === null;
 
 	const renderSlot = (cat: ItemCategory) => {
 		const slot = slotByCategory(cat);
@@ -95,19 +92,7 @@ export function PokemonPanel({
 				<div className="inventory__slots">{right.map(renderSlot)}</div>
 			</div>
 
-			<div className="inventory__actions">
-				<button
-					type="button"
-					className="inventory__btn"
-					disabled={primaryDisabled}
-					onClick={onPrimaryAction}
-				>
-					{primaryLabel}
-				</button>
-				<button type="button" className="inventory__btn" disabled>
-					LEVEL UP
-				</button>
-			</div>
+			{footer}
 		</div>
 	);
 }
