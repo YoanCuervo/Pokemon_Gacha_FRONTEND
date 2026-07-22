@@ -165,14 +165,18 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 						alt={evolution.stone.name}
 						className="evolution__counter-icon"
 					/>
-					<span
-						className={
-							evolution.can_evolve
-								? "evolution__counter-value evolution__counter-value--ok"
-								: "evolution__counter-value"
-						}
-					>
-						{evolution.stones_owned} / {evolution.stone_cost}
+					<span className="evolution__counter-value">
+						<span
+							className={
+								evolution.can_evolve
+									? "evolution__counter-owned evolution__counter-owned--ok"
+									: "evolution__counter-owned"
+							}
+						>
+							{evolution.stones_owned}
+						</span>
+						{" / "}
+						{evolution.stone_cost}
 					</span>
 				</div>
 			) : (

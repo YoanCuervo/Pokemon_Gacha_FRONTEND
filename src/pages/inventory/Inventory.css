@@ -221,16 +221,16 @@
 
 .equip-slot--selected {
 	border-color: #fbc02d;
-	animation: slot-pulse 1.4s ease-in-out infinite;
+	animation: slot-pulse 2s ease-in-out infinite;
 }
 
 @keyframes slot-pulse {
 	0%,
 	100% {
-		box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.5);
+		box-shadow: 0 0 0 0 rgba(180, 95, 0, 0.7);
 	}
 	50% {
-		box-shadow: 0 0 12px 3px rgba(251, 192, 45, 0.8);
+		box-shadow: 0 0 12px 3px rgba(180, 95, 0, 0.95);
 	}
 }
 
@@ -298,7 +298,7 @@
 
 .inventory__tab--active {
 	border-color: #fbc02d;
-	animation: slot-pulse 1.4s ease-in-out infinite;
+	animation: slot-pulse 2s ease-in-out infinite;
 }
 
 .inventory__placeholder {
@@ -514,4 +514,242 @@
 	gap: 1rem;
 	justify-content: flex-end;
 	margin-top: auto;
+}
+
+/* =====================================================================
+   ONGLET ÉVOLUTION (A) — grille de pierres, compteur, confirmation.
+   Repris du système de l'onglet Équipement : même grille 7x80px, même
+   triplet de bouton, même glow doré. La pierre REQUISE porte le glow
+   (slot-pulse) ; les autres sont possédées mais inutiles ici.
+   ===================================================================== */
+
+/* Même grille que les items (cohérence totale entre onglets) */
+.evolution__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 80px);
+	grid-auto-rows: 80px;
+	gap: 1rem;
+	justify-content: center;
+	max-height: 272px;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.evolution__grid::-webkit-scrollbar {
+	display: none;
+}
+
+.stone-cell {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bg-surface);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.stone-cell:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.08);
+	z-index: 5;
+	box-shadow:
+		0 0 14px rgba(255, 255, 255, 0.25),
+		inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.stone-cell:hover .stone-cell__icon {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) brightness(1.15);
+}
+
+/* La pierre requise : mise en avant, glow doré (même signal que le slot
+   sélectionné de l'onglet Équipement). */
+.stone-cell--required {
+	border-color: #fbc02d;
+	background-color: var(--bg-hover-gold);
+	animation: slot-pulse 2s ease-in-out infinite;
+}
+
+/* Possédée mais pas celle qu'il faut pour cette évolution */
+.stone-cell--inactive {
+	opacity: 0.45;
+	filter: grayscale(0.7);
+}
+
+/* Les cases vides ne réagissent pas */
+.stone-cell--empty {
+	background-color: var(--bg-surface);
+	opacity: 0.5;
+	cursor: default;
+}
+
+.stone-cell--empty:hover {
+	border-color: var(--border-accent);
+	transform: none;
+	box-shadow: none;
+}
+
+/* Shiny Stone : liseré doré même quand elle n'est pas requise */
+.stone-cell--shiny {
+	border-color: var(--accent);
+}
+
+.stone-cell__icon {
+	width: 70%;
+	height: 70%;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Quantité en bas à droite de la case */
+.stone-cell__qty {
+	position: absolute;
+	right: 5px;
+	bottom: 3px;
+	font-size: 1rem;
+	font-weight: 800;
+	color: #f5e6c8;
+	text-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.95),
+		0 0 6px rgba(0, 0, 0, 0.8);
+	pointer-events: none;
+}
+
+/* ---------- Footer de l'onglet A (sous la card) ---------- */
+.inventory__actions--evolution {
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 1.25rem;
+}
+
+.evolution__counter {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.evolution__counter-icon {
+	width: 32px;
+	height: 32px;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Le compteur : "possédé / requis". Seul le possédé change de couleur. */
+.evolution__counter-value {
+	font-size: 1.05rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	color: var(--text-second);
+}
+
+/* Pas assez de pierres -> le nombre possédé passe en rouge */
+.evolution__counter-owned {
+	color: #e04d4d;
+}
+
+/* Assez de pierres -> doré */
+.evolution__counter-owned--ok {
+	color: #ffd75e;
+}
+
+/* Stade final : pas de pierre, pas de bouton */
+.evolution__max {
+	color: var(--text-second);
+	font-size: 0.85rem;
+	text-align: center;
+	margin: 0;
+}
+
+/* Bouton ÉVOLUER en version shiny (doré plein) */
+.inventory__btn--shiny {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--accent);
+	color: var(--text-second);
+}
+
+.inventory__btn--shiny:hover:not(:disabled) {
+	box-shadow: 0 0 12px 2px rgba(251, 192, 45, 0.6);
+}
+
+/* ---------- Modale de confirmation d'évolution ---------- */
+.evolution-confirm__overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.7);
+	border-radius: var(--radius-lg);
+	z-index: 50;
+}
+
+.evolution-confirm {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 340px;
+	max-width: 440px;
+	padding: 2rem;
+	background-color: #2a1810;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-lg);
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+	text-align: center;
+}
+
+/* Évolution shiny : bordure dorée + halo */
+.evolution-confirm--shiny {
+	border-color: var(--accent);
+	box-shadow:
+		0 10px 40px rgba(0, 0, 0, 0.6),
+		0 0 20px 2px rgba(251, 192, 45, 0.35);
+}
+
+.evolution-confirm__question {
+	margin: 0;
+	font-size: 1.05rem;
+	color: #f5e6c8;
+	line-height: 1.5;
+}
+
+.evolution-confirm__question strong {
+	color: #ffd75e;
+}
+
+.evolution-confirm__cost {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--text-main);
+}
+
+.evolution-confirm__shiny-note {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #ffd75e;
+}
+
+.evolution-confirm__warning {
+	margin: 0;
+	font-size: 0.75rem;
+	color: #c9b896;
+	font-style: italic;
+}
+
+.evolution-confirm__actions {
+	display: flex;
+	gap: 1rem;
+	margin-top: 0.5rem;
 }
