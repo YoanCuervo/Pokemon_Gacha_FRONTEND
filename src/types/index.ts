@@ -134,3 +134,52 @@ export interface ReserveItem {
 export interface ReserveResponse {
 	items: ReserveItem[];
 }
+
+export interface EvolutionInfo {
+	instance_id: number;
+	current: { pokemon_id: number; name: string };
+	target: { pokemon_id: number; name: string } | null;
+	stone: { id: number; name: string; type: string } | null;
+	stone_cost: number | null;
+	stones_owned: number;
+	is_shiny_evolution: boolean;
+	can_evolve: boolean;
+}
+
+export interface UserStone {
+	stone_id: number;
+	name: string;
+	type: string;
+	quantity: number;
+}
+
+export interface StonesResponse {
+	stones: UserStone[];
+}
+
+export interface DecraftableInstance {
+	instance_id: number;
+	pokemon_id: number;
+	name: string;
+	stars: number;
+	level: number;
+	is_shiny: boolean;
+	fragment_value: number;
+	candy_value: number;
+}
+
+export interface PowerState {
+	instance_id: number;
+	stars: number;
+	fragments_owned: number;
+	next_star_cost: number | null;
+	can_upgrade: boolean;
+	decraftable: DecraftableInstance[];
+}
+
+export interface DecraftResult {
+	sacrificed_count: number;
+	fragments_gained: number;
+	candies_gained: number;
+	state: PowerState;
+}

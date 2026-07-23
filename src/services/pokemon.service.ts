@@ -1,5 +1,5 @@
-import type { InstanceDetail, ItemCategory } from "../types";
-import { apiGet, apiPatch } from "./api";
+import type { EvolutionInfo, InstanceDetail, ItemCategory } from "../types";
+import { apiGet, apiPatch, apiPost } from "./api";
 
 /** Fiche d'une instance : identite + etat + 4 slots equipes.
  *  Point de jonction : appele depuis InventoryPage (route) et, plus
@@ -29,4 +29,20 @@ export function unequipItem(
 	return apiPatch<InstanceDetail>(`/pokemon/${instanceId}/unequip`, {
 		category,
 	});
+}
+
+/** Info d'evolution : espece cible, pierre REQUISE (deja choisie par le
+ *  back selon shiny/normal), cout effectif, quantite possedee, verdict.
+ *  Endpoint separe de la fiche : l'onglet Evolution le recharge apres
+ *  une evolution (l'espece a change -> nouvelle cible, nouvelle pierre). */
+export function getEvolution(instanceId: number): Promise<EvolutionInfo> {
+	return apiGet<EvolutionInfo>(`/pokemon/${instanceId}/evolution`);
+}
+
+/** R3 — Evoluer l'instance. Aucun body : le back deduit tout (cible,
+ *  pierre, cout) de l'instance. Renvoie la fiche a jour (nouvelle
+ *  espece, items/etoiles/niveau/shiny conserves).
+ *  Irreversible et couteux : le composant confirme AVANT d'appeler. */
+export function evolveInstance(instanceId: number): Promise<InstanceDetail> {
+	return apiPost<InstanceDetail>(`/pokemon/${instanceId}/evolve`, {});
 }

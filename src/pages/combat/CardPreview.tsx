@@ -44,7 +44,6 @@ export function CardPreview({ member }: Props) {
 			/>
 			<div className="card-preview__stars">
 				{Array.from({ length: member.stars }, (_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: étoiles identiques, liste figée
 					<span key={i}>★</span>
 				))}
 			</div>

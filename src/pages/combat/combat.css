@@ -304,7 +304,7 @@
 .card-preview {
 	position: fixed;
 	top: 50%;
-	right: 160px;
+	right: 66px;
 	transform: translateY(-50%);
 	z-index: 150;
 	display: flex;
