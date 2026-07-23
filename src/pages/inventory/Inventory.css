@@ -1035,3 +1035,271 @@
 	border-color: var(--border-strong);
 	color: var(--text-second);
 }
+/* =====================================================================
+   ONGLET EXPÉRIENCE (D) — bonbons XP, stepper, barre de progression.
+   Un seul item dans la grille (le bonbon est fongible) : la case est
+   informative, l'action passe par le stepper et USE.
+   Pas de confirmation sauf si le geste vide TOUT le pot (bouton MAX).
+   ===================================================================== */
+
+/* Même grille que les autres onglets, une seule case remplie */
+.experience__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 80px);
+	grid-auto-rows: 80px;
+	gap: 1rem;
+	justify-content: center;
+	max-height: 272px;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.experience__grid::-webkit-scrollbar {
+	display: none;
+}
+
+/* ---------- Case du bonbon ---------- */
+/* Un seul item existe (le bonbon est fongible) : pas de plancher de
+   cases vides comme ailleurs, la grille se réduit à sa seule case. */
+.experience__grid {
+	display: flex;
+	justify-content: center;
+	padding: 5rem 0;
+}
+
+.candy-cell {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 96px;
+	height: 96px;
+	background: linear-gradient(135deg, #f88fc0 0%, #e0609f 50%, #b8478a 100%);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.candy-cell:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.08);
+	z-index: 5;
+	box-shadow:
+		0 0 14px rgba(255, 255, 255, 0.25),
+		inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.candy-cell:hover .candy-cell__icon {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) brightness(1.15);
+}
+
+.candy-cell__icon {
+	width: 70%;
+	height: 70%;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Quantité possédée, en bas à droite (même règle que les pierres) */
+.candy-cell__qty {
+	position: absolute;
+	right: 5px;
+	bottom: 3px;
+	font-size: 1rem;
+	font-weight: 800;
+	color: #f5e6c8;
+	text-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.95),
+		0 0 6px rgba(0, 0, 0, 0.8);
+	pointer-events: none;
+}
+
+/* ---------- Stepper (combien de bonbons consommer) ---------- */
+.experience__stepper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+}
+
+.experience__stepper-btn {
+	width: 34px;
+	height: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-size: 1.1rem;
+	font-weight: 700;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.experience__stepper-btn:hover:not(:disabled) {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
+}
+
+.experience__stepper-btn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+/* Saisie directe : plus rapide que 200 clics sur "+" */
+.experience__stepper-input {
+	width: 82px;
+	height: 34px;
+	padding: 0 0.4rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-size: 0.9rem;
+	font-weight: 700;
+	text-align: center;
+}
+
+.experience__stepper-input:focus {
+	outline: none;
+	border-color: var(--border-strong);
+	background-color: var(--bg-hover-gold);
+	color: var(--text-second);
+}
+
+/* Masque les flèches natives : le stepper a les siennes */
+.experience__stepper-input::-webkit-outer-spin-button,
+.experience__stepper-input::-webkit-inner-spin-button {
+	appearance: none;
+	margin: 0;
+}
+
+.experience__stepper-input {
+	appearance: textfield;
+	-moz-appearance: textfield;
+}
+
+/* Raccourci "tout consommer". Ce bouton rend le geste trop facile :
+   c'est pour ça que USE demande confirmation quand amount = pot. */
+.experience__stepper-max {
+	height: 34px;
+	padding: 0 0.7rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+}
+
+.experience__stepper-max:hover:not(:disabled) {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
+}
+
+.experience__stepper-max:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+/* ---------- Footer de l'onglet D : la barre de progression ---------- */
+.inventory__actions--experience {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.5rem;
+	width: 100%;
+	max-width: 300px;
+	margin: 0 auto;
+}
+
+.xp-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	width: 100%;
+}
+
+.xp-bar__header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.xp-bar__level {
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--text-second);
+	letter-spacing: 0.02em;
+}
+
+.xp-bar__value {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--text-second);
+	opacity: 0.7;
+}
+
+.xp-bar__track {
+	position: relative;
+	height: 14px;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	overflow: hidden;
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Le remplissage. La transition porte l'animation de montée de niveau :
+   à chaque palier franchi la barre va jusqu'à 100%, puis est remise à 0
+   SANS transition (--instant) avant de repartir. */
+.xp-bar__fill {
+	height: 100%;
+	background: linear-gradient(90deg, #7ac74c 0%, #a8e063 50%, #ffd75e 100%);
+	border-radius: 999px;
+	box-shadow: 0 0 8px rgba(122, 199, 76, 0.5);
+	transition: width 0.42s ease-out;
+}
+
+/* Remise à zéro instantanée entre deux niveaux : sans ça, la barre
+   redescendrait visiblement de 100% à 0%, ce qui casse l'effet. */
+.xp-bar__fill--instant {
+	transition: none;
+}
+
+/* ---------- Modale de confirmation "tout consommer" ----------
+   Même traitement que la modale de décraft : fond clair, texte sombre.
+   Elle ne détruit rien, mais vider son pot d'un coup se regrette —
+   elle doit trancher visuellement comme une décision, pas une info. */
+.candy-confirm {
+	background-color: var(--bg-surface);
+	border-color: var(--border-strong);
+}
+
+.candy-confirm .evolution-confirm__question {
+	color: var(--text-second);
+}
+
+.candy-confirm .evolution-confirm__question strong {
+	color: var(--danger);
+}
+
+/* Le gain d'XP : c'est la contrepartie, elle doit ressortir en positif */
+.candy-confirm .evolution-confirm__cost {
+	color: #4a8c2a;
+	font-size: 1.05rem;
+}
+
+.candy-confirm .evolution-confirm__warning {
+	color: var(--text-second);
+	opacity: 0.75;
+}
