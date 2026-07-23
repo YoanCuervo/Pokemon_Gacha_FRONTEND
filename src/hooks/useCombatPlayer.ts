@@ -190,11 +190,6 @@ export function useCombatPlayer(log: CombatLog): CombatPlayer {
 
 	const tempoMs = BASE_TEMPO_MS / state.speed;
 
-	// Le métronome : un timeout par battement (pas un interval : le tempo
-	// peut changer entre deux battements via ×2).
-	// state.cursor n'est pas lu dans l'effet mais il est le MÉTRONOME :
-	// chaque battement consommé réarme le timeout du suivant.
-	// biome-ignore lint/correctness/useExhaustiveDependencies: cursor réarme volontairement l'effet
 	useEffect(() => {
 		if (state.finished || state.paused) return;
 		const t = setTimeout(() => dispatch({ kind: "tick" }), tempoMs);

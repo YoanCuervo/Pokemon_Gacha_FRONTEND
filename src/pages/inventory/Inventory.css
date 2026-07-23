@@ -1,9 +1,3 @@
-/* =====================================================================
-   INVENTAIRE — layout équilibré (5fr/7fr), boutons alignés via flex
-   (les 2 colonnes stretch + margin-top:auto), card affinée, type
-   haut-gauche, étoiles haut-droite, grille entre-deux, filter lisible.
-   ===================================================================== */
-
 .inventory-overlay {
 	position: fixed;
 	inset: 0;
@@ -162,9 +156,28 @@
 	font-weight: 700;
 }
 
+/* Marqueur shiny : un "S" stylise, PAS une etoile — les etoiles sont
+   reservees a la puissance (systeme de craft), les confondre serait
+   trompeur. Doré, comme le reste du vocabulaire shiny du jeu. */
 .inventory__shiny {
-	color: var(--accent);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.1em;
+	height: 1.2em;
 	margin-left: 0.3rem;
+	border-radius: 3px;
+	border: 1px solid black;
+	background: linear-gradient(135deg, #e05a4d 0%, #c22e28 50%, #7a1f1a 100%);
+	color: #fbc02d;
+	font-weight: 900;
+	font-style: italic;
+	font-size: 0.7em;
+	line-height: 1;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.4),
+		inset 0 1px 1px rgba(255, 255, 255, 0.5);
+	text-shadow: none;
 }
 
 .inventory__level {
@@ -662,10 +675,16 @@
 
 /* Stade final : pas de pierre, pas de bouton */
 .evolution__max {
-	color: var(--text-second);
-	font-size: 0.85rem;
-	text-align: center;
 	margin: 0;
+	padding: 0.6rem 1.2rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: #f5e6c8;
+	font-size: 0.85rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-align: center;
 }
 
 /* Bouton ÉVOLUER en version shiny (doré plein) */
@@ -752,4 +771,267 @@
 	display: flex;
 	gap: 1rem;
 	margin-top: 0.5rem;
+}
+
+/* =====================================================================
+   ONGLET PUISSANCE (B) — grille de doublons, jeton de fragments,
+   confirmation destructive.
+   Meme systeme que les autres onglets : grille 7x80px, glow doré sur
+   la selection, tooltip fixed, modale par-dessus l'inventaire.
+   Difference : la selection est MULTIPLE et l'action est DESTRUCTIVE.
+   ===================================================================== */
+
+/* Même grille que les items et les pierres */
+.power__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 80px);
+	grid-auto-rows: 80px;
+	gap: 1rem;
+	justify-content: center;
+	max-height: 272px;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.power__grid::-webkit-scrollbar {
+	display: none;
+}
+
+/* Aucun doublon disponible */
+.power__empty {
+	margin: 0;
+	padding: 3rem 2rem;
+	text-align: center;
+	color: #f5e6c8;
+	font-size: 0.85rem;
+	line-height: 1.6;
+}
+
+/* ---------- Case d'un doublon sacrifiable ---------- */
+.decraft-cell {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	background-color: var(--bg-surface);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.decraft-cell:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.08);
+	z-index: 5;
+	box-shadow:
+		0 0 14px rgba(255, 255, 255, 0.25),
+		inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.decraft-cell:hover .decraft-cell__icon {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) brightness(1.15);
+}
+
+/* Sélectionné pour le sacrifice : glow doré (même signal que partout) */
+.decraft-cell--selected {
+	border-color: #fbc02d;
+	background-color: var(--bg-hover-gold);
+	animation: slot-pulse 2s ease-in-out infinite;
+}
+
+/* Un shiny dans la liste : liseré doré, il doit se remarquer avant
+   qu'on le détruise par mégarde */
+.decraft-cell--shiny {
+	border-color: #e05a4d;
+}
+
+/* Case de remplissage (plancher visuel de la grille) */
+.decraft-cell--empty {
+	background-color: var(--bg-surface);
+	opacity: 0.5;
+	cursor: default;
+}
+
+.decraft-cell--empty:hover {
+	border-color: var(--border-accent);
+	transform: none;
+	box-shadow: none;
+}
+
+.decraft-cell__icon {
+	width: 78%;
+	height: 78%;
+	object-fit: contain;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+	pointer-events: none;
+}
+
+/* Bandeau d'étoiles vertical à gauche — même langage que la card,
+   en miniature (le joueur juge la valeur d'un coup d'œil) */
+/* Bandeau d'étoiles — à droite, pointe en bas, même DA que la card
+   du panneau gauche (cohérence totale). Version miniature. */
+.decraft-cell__stars {
+	position: absolute;
+	top: -3px;
+	right: 6px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1px;
+	padding: 5px 3px 8px;
+	background: rgb(20 22 26 / 85%);
+	border: 1px solid rgb(255 215 94 / 45%);
+	border-top: none;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% calc(100% - 5px),
+		50% 100%,
+		0 calc(100% - 5px)
+	);
+	font-size: 7px;
+	line-height: 1;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+	pointer-events: none;
+}
+
+.decraft-cell__star {
+	color: #ffd75e;
+}
+
+.decraft-cell__star--empty {
+	color: rgb(255 215 94 / 25%);
+}
+
+/* Niveau en bas à droite */
+.decraft-cell__level {
+	position: absolute;
+	right: 4px;
+	bottom: 2px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: #f5e6c8;
+	text-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.95),
+		0 0 6px rgba(0, 0, 0, 0.8);
+	pointer-events: none;
+}
+
+/* ---------- Modale de décraft ----------
+   Hérite de .evolution-confirm (même overlay, même boîte) et ajoute
+   la liste de ce qui va disparaître. */
+.decraft-confirm {
+	max-width: 520px;
+	background-color: var(--bg-surface);
+	border-color: var(--border-strong);
+}
+
+.decraft-confirm .evolution-confirm__question {
+	color: var(--text-second);
+}
+
+.decraft-confirm .evolution-confirm__question strong {
+	color: var(--danger);
+}
+
+.decraft-confirm .evolution-confirm__cost {
+	color: var(--text-second);
+}
+
+.decraft-confirm .evolution-confirm__warning {
+	color: var(--text-second);
+	opacity: 0.75;
+	line-height: 1.6;
+}
+
+.decraft-confirm__list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	width: 100%;
+	/* Hauteur libre jusqu'à 10 pokémon, puis scroll. Une ligne fait
+	   ~34px (sprite 28 + padding) : 10 x 34 + le padding du conteneur. */
+	max-height: 348px;
+	overflow-y: auto;
+	padding: 0.4rem 0.5rem;
+	background-color: rgba(0, 0, 0, 0.06);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius);
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+
+.decraft-confirm__list::-webkit-scrollbar {
+	width: 6px;
+}
+
+.decraft-confirm__list::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.decraft-confirm__item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.15rem 0.3rem;
+	border-radius: var(--radius);
+}
+
+.decraft-confirm__sprite {
+	width: 28px;
+	height: 28px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+/* Nom collé au sprite, pas étiré sur toute la largeur */
+.decraft-confirm__label {
+	flex: 0 1 auto;
+	text-align: left;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-second);
+	white-space: nowrap;
+}
+
+/* La méta pousse à droite mais reste proche du nom sur les lignes
+   courtes : marge auto plutôt qu'un flex:1 sur le label */
+.decraft-confirm__meta {
+	margin-left: auto;
+	padding-left: 1rem;
+	font-size: 0.75rem;
+	color: var(--text-second);
+	opacity: 0.7;
+	white-space: nowrap;
+}
+
+/* Un shiny va être détruit : avertissement appuyé */
+.decraft-confirm__shiny-warning {
+	margin: 0;
+	padding: 0.4rem 0.9rem;
+	background-color: rgba(216, 26, 26, 0.1);
+	border: 1px solid var(--danger);
+	border-radius: var(--radius);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--danger);
+}
+
+/* Bouton de confirmation d'une action destructive */
+.inventory__btn--danger {
+	background-color: rgba(216, 26, 26, 0.12);
+	border-color: var(--danger);
+	color: var(--danger);
+}
+
+.inventory__btn--danger:hover:not(:disabled) {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
 }

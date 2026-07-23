@@ -62,7 +62,6 @@ export function PokemonPanel({
 					<div className="inventory__stars">
 						{Array.from({ length: MAX_STARS }, (_, i) => (
 							<span
-								// biome-ignore lint/suspicious/noArrayIndexKey: liste figée de 5 crans
 								key={i}
 								className={
 									i < instance.stars
@@ -83,7 +82,7 @@ export function PokemonPanel({
 					<div className="inventory__card-info">
 						<span className="inventory__name">
 							{pokemonNameFr(instance.pokemon_id)}
-							{instance.is_shiny && <span className="inventory__shiny">★</span>}
+							{instance.is_shiny && <span className="inventory__shiny">S</span>}
 						</span>
 						<span className="inventory__level">Nv {instance.level}</span>
 					</div>

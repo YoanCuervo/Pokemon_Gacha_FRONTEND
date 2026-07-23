@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { FragmentTokenFromInstance } from "../../components/FragmentToken";
 import { getReserve } from "../../services/item.service";
 import {
 	equipItem,
@@ -9,20 +10,28 @@ import {
 	getInstance,
 	unequipItem,
 } from "../../services/pokemon.service";
+import {
+	decraftInstances,
+	getPower,
+	upgradeStar,
+} from "../../services/power.service";
 import { getStones } from "../../services/stones.service";
 import type {
 	EvolutionInfo,
 	InstanceDetail,
 	ItemCategory,
+	PowerState,
 	ReserveItem,
 	UserStone,
 } from "../../types";
 import { itemSpriteUrl } from "../../utils/sprites";
+import { DecraftConfirm } from "./DecraftConfirm";
 import { EquipmentTab } from "./EquipmentTab";
 import { EvolutionConfirm } from "./EvolutionConfirm";
 import { EvolutionTab } from "./EvolutionTab";
 import { type InventoryTab, InventoryTabs } from "./InventoryTabs";
 import { PokemonPanel } from "./PokemonPanel";
+import { PowerTab } from "./PowerTab";
 import "./Inventory.css";
 
 type LoadState =
@@ -36,6 +45,7 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 	const [reserve, setReserve] = useState<ReserveItem[]>([]);
 	const [evolution, setEvolution] = useState<EvolutionInfo | null>(null);
 	const [stones, setStones] = useState<UserStone[]>([]);
+	const [power, setPower] = useState<PowerState | null>(null);
 
 	const [activeTab, setActiveTab] = useState<InventoryTab>("equipment");
 	const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>(
@@ -48,6 +58,14 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 	const [confirming, setConfirming] = useState(false);
 	const [evolving, setEvolving] = useState(false);
 
+	// PUISSANCE : selection de doublons + confirmation de decraft.
+	// La selection vit ici (pas dans PowerTab) : la modale en a besoin
+	// pour afficher ce qui va etre detruit.
+	const [selectedDecraft, setSelectedDecraft] = useState<number[]>([]);
+	const [confirmingDecraft, setConfirmingDecraft] = useState(false);
+	const [decrafting, setDecrafting] = useState(false);
+	const [upgrading, setUpgrading] = useState(false);
+
 	useEffect(() => {
 		let cancelled = false;
 		setLoad({ status: "loading" });
@@ -56,13 +74,15 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 			getReserve(),
 			getEvolution(instanceId),
 			getStones(),
+			getPower(instanceId),
 		])
-			.then(([d, r, e, s]) => {
+			.then(([d, r, e, s, p]) => {
 				if (cancelled) return;
 				setDetail(d);
 				setReserve(r);
 				setEvolution(e);
 				setStones(s);
+				setPower(p);
 				setLoad({ status: "ready" });
 			})
 			.catch((e: unknown) => {
@@ -121,6 +141,42 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		}
 	}
 
+	// PUISSANCE — coche/decoche un doublon dans la grille.
+	function handleToggleDecraft(id: number) {
+		setSelectedDecraft((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		);
+	}
+
+	// R1 — Decraft confirme. DESTRUCTIF : les instances disparaissent.
+	// Le POST renvoie l'etat a jour ; on re-fetch aussi la fiche (les
+	// items des sacrifies sont revenus en reserve) et on vide la selection.
+	async function handleDecraft() {
+		setDecrafting(true);
+		try {
+			const result = await decraftInstances(instanceId, selectedDecraft);
+			setPower(result.state);
+			setReserve(await getReserve());
+			setSelectedDecraft([]);
+			setConfirmingDecraft(false);
+		} finally {
+			setDecrafting(false);
+		}
+	}
+
+	// R2 — Monter une etoile. Le POST renvoie l'etat a jour ; on re-fetch
+	// la fiche car la card affiche le bandeau d'etoiles.
+	async function handleUpgradeStar() {
+		setUpgrading(true);
+		try {
+			const updated = await upgradeStar(instanceId);
+			setPower(updated);
+			setDetail(await getInstance(instanceId));
+		} finally {
+			setUpgrading(false);
+		}
+	}
+
 	const pokemonType = detail?.instance.type_primary ?? null;
 	const pokemonTypeSecondary = detail?.instance.type_secondary ?? null;
 
@@ -132,6 +188,15 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 			return true;
 		});
 	}, [reserve, selectedCategory, filterType, filterRarity]);
+
+	// Les instances selectionnees, resolues en objets complets pour la
+	// modale (elle affiche sprites, etoiles, rendement).
+	const selectedInstances = useMemo(() => {
+		if (!power) return [];
+		return power.decraftable.filter((d) =>
+			selectedDecraft.includes(d.instance_id),
+		);
+	}, [power, selectedDecraft]);
 
 	// Le footer sous la card depend de l'onglet actif. Le panel ne connait
 	// pas les regles des onglets : il affiche ce qu'on lui compose ici.
@@ -200,10 +265,48 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		</div>
 	);
 
+	// Footer PUISSANCE : le pot de fragments "possede / requis" + USE.
+	// next_star_cost null = 5 etoiles atteintes, plus rien a monter.
+	const powerFooter = power && detail && (
+		<div className="inventory__actions inventory__actions--evolution">
+			{power.next_star_cost !== null ? (
+				<>
+					<div className="evolution__counter">
+						<FragmentTokenFromInstance instance={detail.instance} />
+						<span className="evolution__counter-value">
+							<span
+								className={
+									power.can_upgrade
+										? "evolution__counter-owned evolution__counter-owned--ok"
+										: "evolution__counter-owned"
+								}
+							>
+								{power.fragments_owned}
+							</span>
+							{" / "}
+							{power.next_star_cost}
+						</span>
+					</div>
+					<button
+						type="button"
+						className="inventory__btn"
+						disabled={!power.can_upgrade || upgrading}
+						onClick={handleUpgradeStar}
+					>
+						{upgrading ? "…" : "USE"}
+					</button>
+				</>
+			) : (
+				<p className="evolution__max">Puissance maximale atteinte</p>
+			)}
+		</div>
+	);
+
 	const footerByTab: Record<InventoryTab, React.ReactNode> = {
+		evolution: evolutionFooter,
 		equipment: equipmentFooter,
-		experience: evolutionFooter,
-		power: null,
+		power: powerFooter,
+		experience: null,
 	};
 
 	return (
@@ -236,6 +339,9 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 						<div className="inventory__right">
 							<InventoryTabs activeTab={activeTab} onChangeTab={setActiveTab} />
 
+							{activeTab === "evolution" && evolution && (
+								<EvolutionTab evolution={evolution} stones={stones} />
+							)}
 							{activeTab === "equipment" && (
 								<EquipmentTab
 									items={visibleItems}
@@ -248,12 +354,17 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 									onEquip={handleEquip}
 								/>
 							)}
-							{activeTab === "experience" && evolution && (
-								<EvolutionTab evolution={evolution} stones={stones} />
+							{activeTab === "power" && power && (
+								<PowerTab
+									decraftable={power.decraftable}
+									selectedIds={selectedDecraft}
+									onToggleSelect={handleToggleDecraft}
+									onOpenConfirm={() => setConfirmingDecraft(true)}
+								/>
 							)}
-							{activeTab === "power" && (
+							{activeTab === "experience" && (
 								<div className="inventory__placeholder">
-									PUISSANCE — à venir
+									EXPÉRIENCE — à venir
 								</div>
 							)}
 						</div>
@@ -264,6 +375,15 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 								pending={evolving}
 								onConfirm={handleEvolve}
 								onCancel={() => setConfirming(false)}
+							/>
+						)}
+
+						{confirmingDecraft && (
+							<DecraftConfirm
+								selected={selectedInstances}
+								pending={decrafting}
+								onConfirm={handleDecraft}
+								onCancel={() => setConfirmingDecraft(false)}
 							/>
 						)}
 					</div>
