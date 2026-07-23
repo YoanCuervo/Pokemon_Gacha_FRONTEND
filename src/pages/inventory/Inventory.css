@@ -849,19 +849,6 @@
 	border-color: #e05a4d;
 }
 
-/* Case de remplissage (plancher visuel de la grille) */
-.decraft-cell--empty {
-	background-color: var(--bg-surface);
-	opacity: 0.5;
-	cursor: default;
-}
-
-.decraft-cell--empty:hover {
-	border-color: var(--border-accent);
-	transform: none;
-	box-shadow: none;
-}
-
 .decraft-cell__icon {
 	width: 78%;
 	height: 78%;
@@ -870,8 +857,6 @@
 	pointer-events: none;
 }
 
-/* Bandeau d'étoiles vertical à gauche — même langage que la card,
-   en miniature (le joueur juge la valeur d'un coup d'œil) */
 /* Bandeau d'étoiles — à droite, pointe en bas, même DA que la card
    du panneau gauche (cohérence totale). Version miniature. */
 .decraft-cell__stars {
@@ -1034,28 +1019,6 @@
 	background-color: var(--bg-hover-gold);
 	border-color: var(--border-strong);
 	color: var(--text-second);
-}
-/* =====================================================================
-   ONGLET EXPÉRIENCE (D) — bonbons XP, stepper, barre de progression.
-   Un seul item dans la grille (le bonbon est fongible) : la case est
-   informative, l'action passe par le stepper et USE.
-   Pas de confirmation sauf si le geste vide TOUT le pot (bouton MAX).
-   ===================================================================== */
-
-/* Même grille que les autres onglets, une seule case remplie */
-.experience__grid {
-	display: grid;
-	grid-template-columns: repeat(7, 80px);
-	grid-auto-rows: 80px;
-	gap: 1rem;
-	justify-content: center;
-	max-height: 272px;
-	overflow-y: auto;
-	scrollbar-width: none;
-}
-
-.experience__grid::-webkit-scrollbar {
-	display: none;
 }
 
 /* ---------- Case du bonbon ---------- */
