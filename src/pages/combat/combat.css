@@ -278,6 +278,11 @@
 	letter-spacing: 0.08em;
 }
 
+.combat-result__actions {
+	display: flex;
+	gap: 12px;
+}
+
 .combat-result__back:hover {
 	background: #3a3e48;
 }

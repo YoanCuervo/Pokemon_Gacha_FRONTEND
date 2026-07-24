@@ -228,6 +228,10 @@
 	padding: 0.75rem 0 1.25rem;
 }
 
+.team-composer__reset {
+	font-size: 0.7rem;
+	white-space: nowrap;
+}
 /* ---------------------------------------------------------------------
    4. SLOT VIDE ou EN ATTENTE — deux états transitoires, volontairement
       sobres : la carte de combat ne s'affiche que quand le back a

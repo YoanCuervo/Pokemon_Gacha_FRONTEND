@@ -24,9 +24,62 @@ const TEAM_SIZE = 6;
  *  pour "150". */
 const PREVIEW_DEBOUNCE_MS = 350;
 
+/** Cle localStorage du BROUILLON de travail (les deux equipes).
+ *  Versionnee : si la forme de SandboxTeamDraft change, on bump et
+ *  l'ancien brouillon est simplement ignore. Les sauvegardes DURABLES
+ *  (3 slots nommes) seront en BDD — Lot 2. */
+const STORAGE_KEY = "sandbox.teams.v1";
+
 /** Une equipe vide : 6 trous. */
 function emptyTeam(name: string): SandboxTeamDraft {
 	return { name, slots: Array(TEAM_SIZE).fill(null) };
+}
+
+/** Relit une equipe du localStorage en NETTOYANT silencieusement :
+ *  - forme invalide -> equipe vide (jamais de crash au montage) ;
+ *  - espece disparue du catalogue -> slot vide ;
+ *  - item disparu -> item retire, le membre survit.
+ *  Le catalogue a pu changer entre deux sessions (migrations SQL) :
+ *  on garde le maximum plutot que de tout jeter. */
+function sanitizeTeam(
+	raw: unknown,
+	fallbackName: string,
+	species: SpeciesCatalogEntry[],
+	items: ItemCatalogEntry[],
+): SandboxTeamDraft {
+	if (typeof raw !== "object" || raw === null) return emptyTeam(fallbackName);
+	const candidate = raw as { name?: unknown; slots?: unknown };
+	const name =
+		typeof candidate.name === "string" && candidate.name.trim() !== ""
+			? candidate.name
+			: fallbackName;
+	const rawSlots: unknown[] = Array.isArray(candidate.slots)
+		? candidate.slots
+		: [];
+	if (rawSlots.length === 0) return emptyTeam(name);
+
+	const speciesIds = new Set(species.map((s) => s.pokemon_id));
+	const itemIds = new Set(items.map((it) => it.template_id));
+
+	const slots: (SandboxMember | null)[] = Array.from(
+		{ length: TEAM_SIZE },
+		(_, i) => {
+			const m = rawSlots[i] as SandboxMember | null | undefined;
+			if (!m || typeof m !== "object") return null;
+			if (!speciesIds.has(m.pokemon_id)) return null;
+			return {
+				pokemon_id: m.pokemon_id,
+				level: typeof m.level === "number" ? m.level : 50,
+				stars: typeof m.stars === "number" ? m.stars : 3,
+				is_shiny: Boolean(m.is_shiny),
+				item_template_ids: Array.isArray(m.item_template_ids)
+					? m.item_template_ids.filter((id) => itemIds.has(id))
+					: [],
+			};
+		},
+	);
+
+	return { name, slots };
 }
 
 /** Compacte un draft (avec trous) vers le format attendu par le back.
@@ -72,12 +125,37 @@ interface SandboxScreenProps {
 export function SandboxScreen({ species, items }: SandboxScreenProps) {
 	const navigate = useNavigate();
 
-	const [teamA, setTeamA] = useState<SandboxTeamDraft>(() =>
-		emptyTeam("Équipe A"),
-	);
-	const [teamB, setTeamB] = useState<SandboxTeamDraft>(() =>
-		emptyTeam("Équipe B"),
-	);
+	// Init depuis le brouillon localStorage, nettoye contre le catalogue
+	// (initialiseur paresseux : lu UNE fois au montage, pas a chaque rendu).
+	const [teamA, setTeamA] = useState<SandboxTeamDraft>(() => {
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			const parsed = stored ? JSON.parse(stored) : null;
+			return sanitizeTeam(parsed?.a, "Équipe A", species, items);
+		} catch {
+			return emptyTeam("Équipe A");
+		}
+	});
+	const [teamB, setTeamB] = useState<SandboxTeamDraft>(() => {
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			const parsed = stored ? JSON.parse(stored) : null;
+			return sanitizeTeam(parsed?.b, "Équipe B", species, items);
+		} catch {
+			return emptyTeam("Équipe B");
+		}
+	});
+
+	// Le brouillon survit a la navigation : chaque changement est ecrit.
+	// Le reset n'a pas de purge a faire — il ecrit des equipes vides.
+	useEffect(() => {
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify({ a: teamA, b: teamB }));
+		} catch {
+			// Stockage plein ou indisponible : le brouillon ne survivra
+			// pas a la navigation, mais l'ecran reste fonctionnel.
+		}
+	}, [teamA, teamB]);
 
 	// Le slot en cours d'edition : quelle equipe, quelle position.
 	const [editing, setEditing] = useState<{
@@ -187,14 +265,20 @@ export function SandboxScreen({ species, items }: SandboxScreenProps) {
 		setEditing(null);
 	}
 
+	/** Vide une equipe (nom compris). L'ecriture localStorage suit via
+	 *  l'effet : pas de purge manuelle. Ferme l'editeur s'il portait
+	 *  sur cette equipe — on n'edite pas un slot d'une equipe videe. */
+	function handleReset(key: TeamKey) {
+		setTeam(key, emptyTeam(key === "a" ? "Équipe A" : "Équipe B"));
+		if (editing?.key === key) setEditing(null);
+	}
+
 	async function handleLaunch() {
 		setLaunching(true);
 		setError(null);
 		try {
 			const log = await runSandboxCombat(payload);
-			// Le log part sur /combat : un seul ecran de combat pour tout
-			// le jeu (sandbox, PVE, PVP), plusieurs sources de log.
-			navigate("/combat", { state: { log } });
+			navigate("/combat", { state: { log, sandboxPayload: payload } });
 		} catch (e: unknown) {
 			setError(e instanceof Error ? e.message : "Erreur inconnue");
 			setLaunching(false);
@@ -215,6 +299,7 @@ export function SandboxScreen({ species, items }: SandboxScreenProps) {
 					selectedSlot={editing?.key === "a" ? editing.slot : null}
 					onChangeName={(name) => setTeamA({ ...teamA, name })}
 					onSelectSlot={(slot) => setEditing({ key: "a", slot })}
+					onReset={() => handleReset("a")}
 				/>
 				<TeamComposer
 					label="ÉQUIPE B"
@@ -223,6 +308,7 @@ export function SandboxScreen({ species, items }: SandboxScreenProps) {
 					selectedSlot={editing?.key === "b" ? editing.slot : null}
 					onChangeName={(name) => setTeamB({ ...teamB, name })}
 					onSelectSlot={(slot) => setEditing({ key: "b", slot })}
+					onReset={() => handleReset("b")}
 				/>
 			</div>
 

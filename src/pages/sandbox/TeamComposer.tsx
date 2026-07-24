@@ -15,6 +15,7 @@ interface TeamComposerProps {
 	selectedSlot: number | null;
 	onChangeName: (name: string) => void;
 	onSelectSlot: (slot: number) => void;
+	onReset: () => void;
 }
 
 /** Une equipe composee : nom + stats sur une ligne, puis les 6 slots
@@ -30,6 +31,7 @@ export function TeamComposer({
 	selectedSlot,
 	onChangeName,
 	onSelectSlot,
+	onReset,
 }: TeamComposerProps) {
 	// Le draft porte 6 slots dont certains peuvent etre vides (null) :
 	// laisser un trou est un choix de compo, pas un oubli.
@@ -38,6 +40,8 @@ export function TeamComposer({
 
 	const setupAt = (slot: number): MemberSetup | null =>
 		preview?.members.find((m) => m.slot_position === slot) ?? null;
+
+	const isEmpty = team.slots.every((s) => s === null);
 
 	return (
 		<div className="team-composer">
@@ -52,6 +56,18 @@ export function TeamComposer({
 					maxLength={40}
 					onChange={(e) => onChangeName(e.target.value)}
 				/>
+
+				{/* Vider l'equipe : geste destructif mais sans confirmation
+				    (compos de theorycrafting, refaites en quelques clics).
+				    Desactive si deja vide. */}
+				<button
+					type="button"
+					className="inventory__btn inventory__btn--danger team-composer__reset"
+					disabled={isEmpty}
+					onClick={onReset}
+				>
+					VIDER
+				</button>
 
 				{/* Stats agregees, calculees par le back. SPEED decide de
 				    l'initiative (COMBAT_SPEC 4.1) — la seule stat d'equipe
