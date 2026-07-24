@@ -3,16 +3,17 @@
 // Fiche d'identité FIGÉE du combattant : tout vient de MemberSetup
 // (stats d'avant combat), rien de vivant — le panneau ne bouge pas
 // pendant le combat. Slots d'items : 4 positions fixes att/def/
-// speed/spe, remplies depuis member.items (fond = rareté), détail
-// nom FR · effet listé dessous (pas de tooltip : le panneau est
-// lui-même un hover, pointer-events none).
+// speed/spe, remplies depuis member.items (sprite + fond = rareté),
+// détail nom FR · effet listé dessous (pas de tooltip : le panneau
+// est lui-même un hover, pointer-events none).
 // =====================================================================
 
 import { ROLE_FR } from "../../i18n/combat.fr";
 import { itemEffectFr, itemNameFr } from "../../i18n/items.fr";
 import { pokemonNameFr } from "../../i18n/pokemon.fr";
+import { typeNameFr } from "../../i18n/type.fr";
 import type { MemberSetup, SetupItem } from "../../types/combat";
-import { artworkUrl } from "../../utils/sprites";
+import { artworkUrl, itemSpriteUrl } from "../../utils/sprites";
 import { RoleIcon } from "./RoleIcon";
 
 interface Props {
@@ -29,14 +30,18 @@ const CATEGORY_LABEL: Record<SetupItem["category"], string> = {
 	spe: "SPE",
 };
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 export function CardPreview({ member }: Props) {
 	const itemByCategory = (category: SetupItem["category"]) =>
 		member.items.find((item) => item.category === category) ?? null;
 
 	return (
 		<aside className="card-preview" data-type={member.type_primary}>
+			{/* Types en haut à gauche, traduits (le "Fire / Flying" anglais
+			    était une incohérence : tout le jeu parle FR) */}
+			<span className="card-preview__types">
+				{typeNameFr(member.type_primary)}
+				{member.type_secondary && ` / ${typeNameFr(member.type_secondary)}`}
+			</span>
 			<img
 				className="card-preview__sprite"
 				src={artworkUrl(member.pokemon_id, member.is_shiny)}
@@ -57,8 +62,15 @@ export function CardPreview({ member }: Props) {
 							key={category}
 							className="card-preview__item"
 							data-rarity={item?.rarity}
+							title={item ? item.name : CATEGORY_LABEL[category]}
 						>
-							{item && CATEGORY_LABEL[category]}
+							{item && (
+								<img
+									className="card-preview__item-icon"
+									src={itemSpriteUrl(item.name)}
+									alt=""
+								/>
+							)}
 						</span>
 					);
 				})}
@@ -72,10 +84,6 @@ export function CardPreview({ member }: Props) {
 					))}
 				</ul>
 			)}
-			<p className="card-preview__types">
-				{capitalize(member.type_primary)}
-				{member.type_secondary && ` / ${capitalize(member.type_secondary)}`}
-			</p>
 			<div className="card-preview__stats">
 				<span className="card-preview__attaque">{member.attaque}</span>
 				<span className="card-preview__vie">{member.vie_max}</span>

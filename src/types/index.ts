@@ -183,3 +183,19 @@ export interface DecraftResult {
 	candies_gained: number;
 	state: PowerState;
 }
+
+export interface XpState {
+	instance_id: number;
+	level: number;
+	max_level: number;
+	xp: number;
+	/** Progression dans le palier courant (numerateur de la barre). */
+	xp_into_level: number;
+	/** Taille du palier courant (denominateur). 0 au niveau max. */
+	xp_for_next_level: number;
+	candies_owned: number;
+	/** XP par bonbon : permet de simuler l'effet du stepper sans
+	 *  rappeler le back a chaque increment. */
+	candy_xp_value: number;
+	is_max_level: boolean;
+}

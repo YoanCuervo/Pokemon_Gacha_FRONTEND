@@ -202,6 +202,10 @@
 .card-preview[data-type="steel"] {
 	--type-color: #8a8a9a;
 }
+.combat-card[data-type="fairy"],
+.card-preview[data-type="fairy"] {
+	--type-color: #c97ba8;
+}
 
 /* ---------------------------------------------------------------------
    Contrôles
@@ -272,6 +276,11 @@
 	color: #fff;
 	text-decoration: none;
 	letter-spacing: 0.08em;
+}
+
+.combat-result__actions {
+	display: flex;
+	gap: 12px;
 }
 
 .combat-result__back:hover {
@@ -438,14 +447,16 @@
 	text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
 }
 
+/* Types en haut à gauche du panneau */
 .card-preview__types {
 	position: absolute;
-	top: 12px;
-	left: 14px;
+	top: 8px;
+	left: 12px;
 	margin: 0;
-	font-size: 12px;
-	text-transform: capitalize;
-	opacity: 0.85;
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: rgb(255 255 255 / 85%);
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
 }
 
 .card-preview__attaque,
@@ -489,6 +500,13 @@
 	background: #2f6fd0;
 }
 
+/* Sprite d'item dans les mini-slots du panneau */
+.card-preview__item-icon {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	image-rendering: pixelated;
+}
 /* ---------------------------------------------------------------------
    PlayerBanner — profil d'un camp, ancré à sa rangée. Hover = stats.
    RANK/WINRATE placeholders (PVP), VITESSE/ATTAQUE/VIE depuis le setup.

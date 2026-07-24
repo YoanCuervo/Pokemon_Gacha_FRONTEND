@@ -11,7 +11,7 @@ import {
 	SortableContext,
 } from "@dnd-kit/sortable";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import TeamSlot from "../components/TeamSlot";
 import { useTeam } from "../context/TeamContext";
@@ -25,6 +25,10 @@ import { animatedSpriteUrl } from "../utils/sprites";
 
 function Team() {
 	const { team, setTeam, box, error, setError, loadData } = useTeam();
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	// null = boîte fermée, sinon numéro du slot cliqué (1-6)
 	const [openSlot, setOpenSlot] = useState<number | null>(null);

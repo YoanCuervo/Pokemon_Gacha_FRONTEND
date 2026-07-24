@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { FragmentTokenFromInstance } from "../../components/FragmentToken";
+import { getExperience, useCandies } from "../../services/experience.service";
 import { getReserve } from "../../services/item.service";
 import {
 	equipItem,
@@ -23,15 +24,19 @@ import type {
 	PowerState,
 	ReserveItem,
 	UserStone,
+	XpState,
 } from "../../types";
 import { itemSpriteUrl } from "../../utils/sprites";
+import { CandyConfirm } from "./CandyConfirm";
 import { DecraftConfirm } from "./DecraftConfirm";
 import { EquipmentTab } from "./EquipmentTab";
 import { EvolutionConfirm } from "./EvolutionConfirm";
 import { EvolutionTab } from "./EvolutionTab";
+import { ExperienceTab } from "./ExperienceTab";
 import { type InventoryTab, InventoryTabs } from "./InventoryTabs";
 import { PokemonPanel } from "./PokemonPanel";
 import { PowerTab } from "./PowerTab";
+import { XpBar } from "./XpBar";
 import "./Inventory.css";
 
 type LoadState =
@@ -46,6 +51,7 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 	const [evolution, setEvolution] = useState<EvolutionInfo | null>(null);
 	const [stones, setStones] = useState<UserStone[]>([]);
 	const [power, setPower] = useState<PowerState | null>(null);
+	const [xp, setXp] = useState<XpState | null>(null);
 
 	const [activeTab, setActiveTab] = useState<InventoryTab>("equipment");
 	const [selectedCategory, setSelectedCategory] = useState<ItemCategory | null>(
@@ -66,6 +72,11 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 	const [decrafting, setDecrafting] = useState(false);
 	const [upgrading, setUpgrading] = useState(false);
 
+	// EXPERIENCE : quantite au stepper, confirmation du geste MAX.
+	const [candyAmount, setCandyAmount] = useState(1);
+	const [confirmingCandy, setConfirmingCandy] = useState(false);
+	const [usingCandy, setUsingCandy] = useState(false);
+
 	useEffect(() => {
 		let cancelled = false;
 		setLoad({ status: "loading" });
@@ -75,14 +86,16 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 			getEvolution(instanceId),
 			getStones(),
 			getPower(instanceId),
+			getExperience(instanceId),
 		])
-			.then(([d, r, e, s, p]) => {
+			.then(([d, r, e, s, p, x]) => {
 				if (cancelled) return;
 				setDetail(d);
 				setReserve(r);
 				setEvolution(e);
 				setStones(s);
 				setPower(p);
+				setXp(x);
 				setLoad({ status: "ready" });
 			})
 			.catch((e: unknown) => {
@@ -150,13 +163,19 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 
 	// R1 — Decraft confirme. DESTRUCTIF : les instances disparaissent.
 	// Le POST renvoie l'etat a jour ; on re-fetch aussi la fiche (les
-	// items des sacrifies sont revenus en reserve) et on vide la selection.
+	// items des sacrifies sont revenus en reserve) et l'XP (le decraft
+	// rend des bonbons), puis on vide la selection.
 	async function handleDecraft() {
 		setDecrafting(true);
 		try {
 			const result = await decraftInstances(instanceId, selectedDecraft);
 			setPower(result.state);
-			setReserve(await getReserve());
+			const [r, x] = await Promise.all([
+				getReserve(),
+				getExperience(instanceId),
+			]);
+			setReserve(r);
+			setXp(x);
 			setSelectedDecraft([]);
 			setConfirmingDecraft(false);
 		} finally {
@@ -174,6 +193,33 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 			setDetail(await getInstance(instanceId));
 		} finally {
 			setUpgrading(false);
+		}
+	}
+
+	// EXPERIENCE — le USE demande confirmation UNIQUEMENT s'il vide le
+	// pot entier (le bouton MAX rend ce geste trop facile a declencher).
+	function handleUseCandies() {
+		if (!xp) return;
+		if (candyAmount >= xp.candies_owned && xp.candies_owned > 0) {
+			setConfirmingCandy(true);
+			return;
+		}
+		void runUseCandies();
+	}
+
+	// Consomme les bonbons. Le niveau peut monter de PLUSIEURS crans d'un
+	// coup : le back recalcule depuis l'xp cumulee. On re-fetch la fiche
+	// (la card affiche le niveau) et on remet le stepper a 1.
+	async function runUseCandies() {
+		setUsingCandy(true);
+		try {
+			const updated = await useCandies(instanceId, candyAmount);
+			setXp(updated);
+			setDetail(await getInstance(instanceId));
+			setCandyAmount(1);
+			setConfirmingCandy(false);
+		} finally {
+			setUsingCandy(false);
 		}
 	}
 
@@ -302,11 +348,24 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 		</div>
 	);
 
+	// Footer EXPERIENCE : la barre de progression du niveau. Elle anime
+	// les montees (plusieurs niveaux possibles d'un coup).
+	const experienceFooter = xp && (
+		<div className="inventory__actions inventory__actions--experience">
+			<XpBar
+				level={xp.level}
+				xpIntoLevel={xp.xp_into_level}
+				xpForNextLevel={xp.xp_for_next_level}
+				isMaxLevel={xp.is_max_level}
+			/>
+		</div>
+	);
+
 	const footerByTab: Record<InventoryTab, React.ReactNode> = {
 		evolution: evolutionFooter,
 		equipment: equipmentFooter,
 		power: powerFooter,
-		experience: null,
+		experience: experienceFooter,
 	};
 
 	return (
@@ -362,10 +421,14 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 									onOpenConfirm={() => setConfirmingDecraft(true)}
 								/>
 							)}
-							{activeTab === "experience" && (
-								<div className="inventory__placeholder">
-									EXPÉRIENCE — à venir
-								</div>
+							{activeTab === "experience" && xp && (
+								<ExperienceTab
+									xp={xp}
+									amount={candyAmount}
+									onChangeAmount={setCandyAmount}
+									onUse={handleUseCandies}
+									pending={usingCandy}
+								/>
 							)}
 						</div>
 
@@ -384,6 +447,16 @@ export function InventoryScreen({ instanceId }: { instanceId: number }) {
 								pending={decrafting}
 								onConfirm={handleDecraft}
 								onCancel={() => setConfirmingDecraft(false)}
+							/>
+						)}
+
+						{confirmingCandy && xp && (
+							<CandyConfirm
+								amount={candyAmount}
+								xpGained={candyAmount * xp.candy_xp_value}
+								pending={usingCandy}
+								onConfirm={runUseCandies}
+								onCancel={() => setConfirmingCandy(false)}
 							/>
 						)}
 					</div>

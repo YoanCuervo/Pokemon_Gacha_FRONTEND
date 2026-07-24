@@ -1,14 +1,31 @@
 // =====================================================================
 // pages/combat/CombatPage.tsx — La page COMBAT (rendu statique v1).
-// Fetch POST /api/combat → CombatLog, puis useCombatPlayer pilote tout.
-// --tempo est exposé en variable CSS : les durées d'animation du
-// chantier suivant se caleront dessus sans JS supplémentaire.
+// Le log peut venir de DEUX sources :
+//   - fourni par la navigation (bac a sable, et demain PVE/PVP) ;
+//   - fetch par defaut (combat miroir V1).
+// Un seul ecran de combat pour tout le jeu, plusieurs sources de log.
+// --tempo est expose en variable CSS : les durees d'animation se
+// calent dessus sans JS supplementaire.
+//
+// REJOUER (bac a sable) : si la navigation fournit aussi le payload
+// sandbox, l'ecran de fin propose de relancer le MEME matchup avec un
+// nouveau tirage (crits...) — c'est le coeur du theorycrafting :
+// une compo se juge sur plusieurs combats, pas un. Le nouveau log
+// remplace l'ancien et CombatScreen est REMONTE a neuf via sa key
+// (useCombatPlayer repart de zero, aucun reset manuel).
 // =====================================================================
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router";
 import { useCombatPlayer } from "../../hooks/useCombatPlayer";
 import { runCombat } from "../../services/combat.service";
-import type { CombatLog, CombatUid, TeamKey } from "../../types/combat";
+import { runSandboxCombat } from "../../services/sandbox.service";
+import type {
+	CombatLog,
+	CombatUid,
+	SandboxPayload,
+	TeamKey,
+} from "../../types/combat";
 import { ARENA_IMAGE } from "../../utils/arenas";
 import { Battlefield } from "./Battlefield";
 import { CardPreview } from "./CardPreview";
@@ -19,7 +36,9 @@ import "./combat.css";
 
 /** Dette auth (JWT à venir) : en V1 miroir, le joueur est l'équipe "a".
  *  Quand l'auth existera, myTeamKey sera dérivé de setup.teams.X.user_id
- *  vs l'utilisateur connecté. Un seul endroit à changer. */
+ *  vs l'utilisateur connecté. Un seul endroit à changer.
+ *  En bac a sable, "a" est la compo de gauche — le joueur pilote les
+ *  deux, la notion de "mon equipe" n'a pas de sens, on garde "a". */
 const MY_TEAM_KEY: TeamKey = "a";
 
 type LoadState =
@@ -28,10 +47,39 @@ type LoadState =
 	| { status: "ready"; log: CombatLog };
 
 export function CombatPage() {
-	const [load, setLoad] = useState<LoadState>({ status: "loading" });
+	const location = useLocation();
+
+	// Un log fourni par la navigation (bac a sable) court-circuite le
+	// fetch. Perdu au rafraichissement (state de route) : acceptable,
+	// un combat n'est pas une page a bookmarker.
+	const navState = location.state as {
+		log?: CombatLog;
+		sandboxPayload?: SandboxPayload;
+	} | null;
+	const providedLog = navState?.log ?? null;
+
+	// Le payload sandbox permet de REJOUER le matchup (nouveau RNG).
+	// Absent hors bac a sable : le bouton n'apparait pas.
+	const sandboxPayload = navState?.sandboxPayload ?? null;
+
+	const [load, setLoad] = useState<LoadState>(
+		providedLog ? { status: "ready", log: providedLog } : { status: "loading" },
+	);
+
+	// Compteur de replays : sert de key a CombatScreen pour forcer un
+	// remontage complet a chaque nouveau log.
+	const [replayCount, setReplayCount] = useState(0);
+	const [replaying, setReplaying] = useState(false);
 
 	useEffect(() => {
+		// Log deja fourni : rien a charger.
+		if (providedLog) {
+			setLoad({ status: "ready", log: providedLog });
+			return;
+		}
+
 		let cancelled = false;
+		setLoad({ status: "loading" });
 		runCombat()
 			.then((log) => {
 				if (!cancelled) setLoad({ status: "ready", log });
@@ -46,18 +94,51 @@ export function CombatPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [providedLog]);
+
+	async function handleReplay() {
+		if (!sandboxPayload || replaying) return;
+		setReplaying(true);
+		try {
+			const log = await runSandboxCombat(sandboxPayload);
+			setLoad({ status: "ready", log });
+			setReplayCount((n) => n + 1);
+		} catch (e: unknown) {
+			setLoad({
+				status: "error",
+				message: e instanceof Error ? e.message : "Erreur inconnue",
+			});
+		} finally {
+			setReplaying(false);
+		}
+	}
 
 	if (load.status === "loading")
 		return <p className="combat-page__loading">Combat en préparation…</p>;
 	if (load.status === "error")
 		return <p className="combat-page__error">Erreur : {load.message}</p>;
-	return <CombatScreen log={load.log} />;
+	return (
+		<CombatScreen
+			key={replayCount}
+			log={load.log}
+			onReplay={sandboxPayload ? handleReplay : null}
+			replaying={replaying}
+		/>
+	);
 }
 
 /** Séparé : useCombatPlayer exige un log — on ne monte l'écran qu'une
  *  fois le fetch terminé (pas de hook conditionnel). */
-function CombatScreen({ log }: { log: CombatLog }) {
+function CombatScreen({
+	log,
+	onReplay,
+	replaying,
+}: {
+	log: CombatLog;
+	/** null hors bac a sable : pas de bouton REJOUER. */
+	onReplay: (() => void) | null;
+	replaying: boolean;
+}) {
 	const player = useCombatPlayer(log);
 	const [hoveredUid, setHoveredUid] = useState<string | null>(null);
 
@@ -138,7 +219,12 @@ function CombatScreen({ log }: { log: CombatLog }) {
 				finished={player.finished}
 			/>
 			{player.finished && player.result && (
-				<CombatResult result={player.result} myTeamKey={MY_TEAM_KEY} />
+				<CombatResult
+					result={player.result}
+					myTeamKey={MY_TEAM_KEY}
+					onReplay={onReplay}
+					replaying={replaying}
+				/>
 			)}
 		</div>
 	);

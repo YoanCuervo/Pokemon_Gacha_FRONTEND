@@ -1,0 +1,1120 @@
+/* =====================================================================
+   BAC À SABLE (tour d'entraînement) — theorycrafting.
+
+   Deux systèmes visuels cohabitent :
+   - le CADRE (overlay, modales, sélecteurs) reprend l'inventaire ;
+   - les CARTES reprennent le combat (fond coloré par type, pastilles
+     ATTAQUE/VIE en bordure basse, bandeau d'étoiles, losange rôle).
+     Le joueur voit sa compo exactement comme elle apparaîtra au combat.
+
+   Deux partis pris de disposition :
+   - les équipes sont EMPILÉES, chacune sur une ligne de 6 slots.
+     L'ordre est une donnée de jeu (l'adjacence en dépend,
+     COMBAT_SPEC 8.1) : jamais une grille 3x2.
+   - l'éditeur de membre tient sur UNE page. Les sélecteurs (251
+     espèces, catalogue d'items) s'ouvrent par-dessus, à la demande.
+
+   Autonomie de la route : slot-pulse, le tooltip d'item et les
+   variables de rareté sont REDÉCLARÉS ici (Inventory.css et
+   combat.css ne sont pas chargés sur /sandbox).
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. CADRE GÉNÉRAL (overlay, frame, header, états)
+   --------------------------------------------------------------------- */
+
+.sandbox-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 10;
+}
+
+.sandbox-modal-frame {
+	position: relative;
+	width: min(1500px, 96vw);
+	height: min(880px, 94vh);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	background-color: var(--bg-surface);
+	border-radius: var(--radius-lg);
+	padding: 2rem;
+
+	/* Raretés — le cadre du bac à sable est clair, mais les cartes et
+	   les slots d'items reprennent les couleurs du combat. */
+	--rarity-common: #6b7280;
+	--rarity-rare: #2563eb;
+	--rarity-ultra_rare: #7c3aed;
+	--rarity-legendary: #d97706;
+	--rarity-mythic: #dc2626;
+}
+
+.sandbox-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border-strong);
+	padding-bottom: 1.25rem;
+}
+
+.sandbox-header h1 {
+	color: var(--text-second);
+	margin: 0;
+	font-size: 1.6rem;
+}
+
+.sandbox-close {
+	color: var(--text-second);
+}
+
+.sandbox__state {
+	color: var(--text-second);
+	text-align: center;
+	padding: 3rem;
+}
+
+.sandbox__error {
+	margin: 0;
+	padding: 0.6rem 1rem;
+	background-color: rgba(216, 26, 26, 0.1);
+	border: 1px solid var(--danger);
+	border-radius: var(--radius);
+	color: var(--danger);
+	font-size: 0.85rem;
+	text-align: center;
+}
+
+/* ---------------------------------------------------------------------
+   2. STRUCTURE DE L'ÉCRAN (équipes empilées scrollables, actions
+      ancrées en bas — le bouton LANCER ne doit JAMAIS sortir du cadre)
+   --------------------------------------------------------------------- */
+
+.sandbox {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	flex: 1;
+	min-height: 0;
+}
+
+/* Empilées : chaque équipe a besoin de toute la largeur pour aligner
+   ses 6 slots en une ligne. Si le contenu déborde, ce sont les
+   équipes qui scrollent, pas le bouton qui disparaît. */
+.sandbox__teams {
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+	overflow-y: auto;
+	min-height: 0;
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+
+.sandbox__actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: auto;
+	flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------
+   3. UNE ÉQUIPE (header nom + stats, ligne de 6 slots)
+   --------------------------------------------------------------------- */
+
+.team-composer {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1.25rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius-lg);
+}
+
+/* Nom et stats sur la même ligne : compact, laisse la place aux cartes */
+.team-composer__header {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.team-composer__label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	color: var(--text-main);
+	white-space: nowrap;
+}
+
+/* Nom libre de la compo : c'est ce qui s'affiche comme "joueur" dans
+   le combat (profiles du setup). */
+.team-composer__name {
+	flex: 1;
+	max-width: 320px;
+	padding: 0.4rem 0.6rem;
+	background-color: var(--bg-surface);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+.team-composer__name::placeholder {
+	color: var(--text-second);
+	opacity: 0.5;
+}
+
+.team-composer__name:focus {
+	outline: none;
+	border-color: var(--border-strong);
+	background-color: var(--bg-hover-gold);
+}
+
+/* Stats agrégées, poussées à droite. Calculées par le back (même
+   chaîne que le combat) — jamais par le front, sinon la preview
+   mentirait sur ce qui va réellement se passer. */
+.team-composer__stats {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	margin-left: auto;
+	padding: 0.4rem 0.9rem;
+	background-color: var(--bg-surface);
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius);
+}
+
+.team-composer__stat {
+	display: flex;
+	align-items: baseline;
+	gap: 0.35rem;
+}
+
+.team-composer__stat-label {
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	color: var(--text-second);
+	opacity: 0.7;
+}
+
+.team-composer__stat-value {
+	font-size: 1rem;
+	font-weight: 800;
+	color: var(--text-second);
+}
+
+/* Les deux couleurs du combat (COMBAT_SPEC 11) */
+.team-composer__stat-value--atk {
+	color: #2e9e46;
+}
+
+.team-composer__stat-value--vie {
+	color: #2f6fd0;
+}
+
+/* Les 6 slots EN LIGNE : la position est une donnée de jeu.
+   Le row-gap laisse respirer les pastilles débordantes des cartes. */
+.team-composer__slots {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 1.5rem 0.9rem;
+	padding: 0.75rem 0 1.25rem;
+}
+
+.team-composer__reset {
+	font-size: 0.7rem;
+	white-space: nowrap;
+}
+/* ---------------------------------------------------------------------
+   4. SLOT VIDE ou EN ATTENTE — deux états transitoires, volontairement
+      sobres : la carte de combat ne s'affiche que quand le back a
+      calculé les vraies stats. Même min-height que .sandbox-card pour
+      que la ligne reste alignée.
+   --------------------------------------------------------------------- */
+
+.sandbox-slot {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2rem;
+	min-height: 185px;
+	padding: 0.6rem 0.4rem;
+	background-color: var(--bg-surface);
+	border: 2px dashed var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.sandbox-slot:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.04);
+	z-index: 5;
+}
+
+.sandbox-slot--selected {
+	border-color: #b45f00;
+	border-style: solid;
+	background-color: var(--bg-hover-gold);
+	animation: slot-pulse 2s ease-in-out infinite;
+}
+
+.sandbox-slot--empty {
+	opacity: 0.55;
+}
+
+/* En attente de la preview : bordure pleine, pas de pointillé */
+.sandbox-slot--pending {
+	border-style: solid;
+	opacity: 0.7;
+}
+
+.sandbox-slot__plus {
+	font-size: 2rem;
+	font-weight: 300;
+	line-height: 1;
+	color: var(--text-second);
+}
+
+.sandbox-slot__index {
+	position: absolute;
+	left: 8px;
+	bottom: 5px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: var(--text-second);
+	opacity: 0.6;
+}
+
+.sandbox-slot__sprite {
+	width: 56px;
+	height: 56px;
+	object-fit: contain;
+	image-rendering: pixelated;
+}
+
+.sandbox-slot__name {
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-align: center;
+	line-height: 1.1;
+	color: var(--text-second);
+}
+
+.sandbox-slot__level {
+	font-size: 0.65rem;
+	color: var(--text-second);
+	opacity: 0.75;
+}
+
+/* =====================================================================
+   5. LA CARTE DE COMBAT — reprise de combat.css, en version compacte
+      et DANS LE FLUX (pas en panneau flottant). Ce que le joueur voit
+      ici, il le reverra à l'identique sur le terrain.
+   ===================================================================== */
+
+.sandbox-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 150px;
+	padding: 2.1rem 0.5rem 1.2rem;
+	border: none;
+	border-radius: 10px;
+	background: var(--type-color, #6b6b6b);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+	color: #fff;
+	cursor: pointer;
+	transition:
+		transform 0.12s,
+		box-shadow 0.12s;
+}
+
+.sandbox-card:hover {
+	transform: translateY(-3px) scale(1.03);
+	box-shadow: 0 6px 18px rgb(0 0 0 / 55%);
+	z-index: 5;
+}
+
+/* Slot en cours d'édition : le glow doré du projet, par-dessus la
+   couleur de type. */
+.sandbox-card--selected {
+	animation: slot-pulse 2s ease-in-out infinite;
+	outline: 2px solid #b45f00;
+	outline-offset: 1px;
+}
+
+/* Pastilles de type en haut à gauche — TypeBadge réduit, bordure
+   blanche pour rester lisible sur le fond coloré de la carte. */
+.sandbox-card__types {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	display: flex;
+	gap: 0.15rem;
+	transform: scale(0.72);
+	transform-origin: left top;
+	z-index: 2;
+}
+
+.sandbox-card__types .type-badge {
+	border: 1px solid #fff;
+}
+
+/* Bandeau d'étoiles — haut droite, pointe en bas (identique combat) */
+.sandbox-card__stars {
+	position: absolute;
+	top: -4px;
+	right: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1px;
+	padding: 12px 8px 20px;
+	background: rgb(20 22 26 / 85%);
+	border: 1px solid rgb(255 215 94 / 45%);
+	border-top: none;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% calc(100% - 6px),
+		50% 100%,
+		0 calc(100% - 6px)
+	);
+	font-size: 8px;
+	line-height: 1;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+	pointer-events: none;
+}
+
+.sandbox-card__star {
+	color: #ffd75e;
+}
+
+.sandbox-card__star--empty {
+	color: rgb(255 215 94 / 25%);
+}
+
+.sandbox-card__sprite {
+	width: 68px;
+	height: 68px;
+	object-fit: contain;
+	filter: drop-shadow(0 2px 4px rgb(0 0 0 / 45%));
+}
+
+.sandbox-card__name {
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.1;
+	text-align: center;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 55%);
+}
+
+/* Les 4 slots d'items : toujours les 4, vides en pointillé.
+   Le fond porte la rareté — même langage que l'inventaire.
+   Rempli : sprite de l'item + bordure blanche pleine (lisibilité). */
+.sandbox-card__items {
+	display: flex;
+	gap: 0.25rem;
+}
+
+.sandbox-card__item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 20px;
+	border-radius: 4px;
+	border: 1px dashed rgb(255 255 255 / 35%);
+	background: rgb(0 0 0 / 20%);
+}
+
+.sandbox-card__item[data-rarity] {
+	border-style: solid;
+	border-color: #fff;
+	background: var(--rarity, rgb(0 0 0 / 20%));
+}
+
+.sandbox-card__item[data-rarity="common"] {
+	--rarity: var(--rarity-common);
+}
+.sandbox-card__item[data-rarity="rare"] {
+	--rarity: var(--rarity-rare);
+}
+.sandbox-card__item[data-rarity="ultra_rare"] {
+	--rarity: var(--rarity-ultra_rare);
+}
+.sandbox-card__item[data-rarity="legendary"] {
+	--rarity: var(--rarity-legendary);
+}
+.sandbox-card__item[data-rarity="mythic"] {
+	--rarity: var(--rarity-mythic);
+}
+
+.sandbox-card__item-icon {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	image-rendering: pixelated;
+}
+
+/* Pastilles ATTAQUE / VIE — en bordure basse, débordantes (combat) */
+.sandbox-card__attaque,
+.sandbox-card__vie {
+	position: absolute;
+	bottom: -11px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 22px;
+	padding: 0 6px;
+	border-radius: 11px;
+	color: #fff;
+	font-weight: 700;
+	font-size: 13px;
+	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+	box-shadow: 0 1px 4px rgb(0 0 0 / 50%);
+}
+
+.sandbox-card__attaque {
+	left: -6px;
+	background: #2e9e46; /* verte, statique (COMBAT_SPEC 11) */
+}
+
+.sandbox-card__vie {
+	right: -6px;
+	background: #2f6fd0; /* bleue, vivante */
+}
+
+/* Losange rôle, centre bas */
+.sandbox-card__role-icon {
+	position: absolute;
+	bottom: -11px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	padding: 3px 7px;
+	border-radius: 4px;
+	background: #14161a;
+	border: 1px solid rgb(255 255 255 / 25%);
+}
+
+/* Couleurs par type — mêmes valeurs que combat.css */
+.sandbox-card[data-type="normal"] {
+	--type-color: #8a8a6d;
+}
+.sandbox-card[data-type="fire"] {
+	--type-color: #c4552e;
+}
+.sandbox-card[data-type="water"] {
+	--type-color: #4a70c9;
+}
+.sandbox-card[data-type="electric"] {
+	--type-color: #c9a325;
+}
+.sandbox-card[data-type="grass"] {
+	--type-color: #5a9938;
+}
+.sandbox-card[data-type="ice"] {
+	--type-color: #6fb8b6;
+}
+.sandbox-card[data-type="fighting"] {
+	--type-color: #a3302a;
+}
+.sandbox-card[data-type="poison"] {
+	--type-color: #8a3d8a;
+}
+.sandbox-card[data-type="ground"] {
+	--type-color: #b3985a;
+}
+.sandbox-card[data-type="flying"] {
+	--type-color: #8578c9;
+}
+.sandbox-card[data-type="psychic"] {
+	--type-color: #d0487c;
+}
+.sandbox-card[data-type="bug"] {
+	--type-color: #8a9a25;
+}
+.sandbox-card[data-type="rock"] {
+	--type-color: #9a8838;
+}
+.sandbox-card[data-type="ghost"] {
+	--type-color: #5c548a;
+}
+.sandbox-card[data-type="dragon"] {
+	--type-color: #5d3fc9;
+}
+.sandbox-card[data-type="dark"] {
+	--type-color: #5a4a3d;
+}
+.sandbox-card[data-type="steel"] {
+	--type-color: #8a8a9a;
+}
+.sandbox-card[data-type="fairy"] {
+	--type-color: #c97ba8;
+}
+
+/* =====================================================================
+   6. MODALES — éditeur de membre, sélecteurs.
+      Overlay ABSOLU (pas fixed) : la modale se cale sur le cadre du
+      bac à sable, pas sur la fenêtre — les slots restent visibles
+      derrière.
+   ===================================================================== */
+
+.sandbox-modal__overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 0, 0, 0.7);
+	border-radius: var(--radius-lg);
+	z-index: 50;
+}
+
+.sandbox-modal {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	width: min(620px, 92%);
+	max-height: 90%;
+	padding: 1.75rem;
+	background-color: #2a1810;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-lg);
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+}
+
+/* Les sélecteurs ont besoin de place : grille de 251 espèces */
+.sandbox-modal--picker {
+	width: min(920px, 95%);
+	max-height: 92%;
+}
+
+.sandbox-modal__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	border-bottom: 1px solid var(--border-strong);
+	padding-bottom: 0.9rem;
+}
+
+.sandbox-modal__header h2 {
+	margin: 0;
+	font-size: 1.05rem;
+	letter-spacing: 0.04em;
+	color: #f5e6c8;
+}
+
+.sandbox-modal__change {
+	padding: 0.35rem 0.8rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.sandbox-modal__change:hover {
+	background-color: var(--bg-hover-gold);
+	border-color: var(--border-strong);
+	color: var(--text-second);
+}
+
+.sandbox-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: auto;
+}
+
+/* ---------------------------------------------------------------------
+   7. ÉDITEUR : identité à gauche, items à droite, réglages en bas
+   --------------------------------------------------------------------- */
+
+.editor__body {
+	display: grid;
+	grid-template-columns: 150px 1fr;
+	gap: 1.25rem;
+	align-items: start;
+}
+
+.editor__identity {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.9rem 0.6rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+}
+
+.editor__sprite {
+	width: 78px;
+	height: 78px;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.editor__name {
+	font-size: 0.9rem;
+	font-weight: 700;
+	text-align: center;
+	line-height: 1.2;
+	color: #f5e6c8;
+}
+
+/* Les 4 slots d'items, 2x2 : tous visibles d'un coup */
+.editor__items {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.6rem;
+}
+
+.sandbox-item-slot {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1rem;
+	min-height: 64px;
+	padding: 0.55rem 0.7rem;
+	background-color: var(--bg-raised);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-main);
+	cursor: pointer;
+	text-align: left;
+}
+
+.sandbox-item-slot:hover {
+	border-color: var(--border-strong);
+}
+
+.sandbox-item-slot--filled[data-rarity="common"] {
+	background-color: var(--rarity-common);
+}
+.sandbox-item-slot--filled[data-rarity="rare"] {
+	background-color: var(--rarity-rare);
+}
+.sandbox-item-slot--filled[data-rarity="ultra_rare"] {
+	background-color: var(--rarity-ultra_rare);
+}
+.sandbox-item-slot--filled[data-rarity="legendary"] {
+	background-color: var(--rarity-legendary);
+}
+.sandbox-item-slot--filled[data-rarity="mythic"] {
+	background-color: var(--rarity-mythic);
+}
+
+.sandbox-item-slot__cat {
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	opacity: 0.7;
+}
+
+.sandbox-item-slot__name {
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1.15;
+	color: #f5e6c8;
+}
+
+.sandbox-item-slot__boost {
+	font-size: 0.72rem;
+	font-weight: 800;
+	color: #ffd75e;
+}
+
+/* --- Réglages (niveau, étoiles, shiny, rôle) --- */
+
+.editor__fields {
+	display: flex;
+	align-items: flex-end;
+	gap: 1.5rem;
+	flex-wrap: wrap;
+	padding: 0.9rem 1rem;
+	background-color: var(--bg-raised);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+}
+
+.sandbox-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+
+.sandbox-field--inline {
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	align-self: center;
+}
+
+.sandbox-field__label {
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	color: #c9b896;
+	text-transform: uppercase;
+}
+
+.sandbox-field__input {
+	width: 90px;
+	height: 34px;
+	padding: 0 0.5rem;
+	background-color: var(--bg-surface);
+	border: 1px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	font-size: 0.9rem;
+	font-weight: 700;
+	text-align: center;
+}
+
+.sandbox-field__input:focus {
+	outline: none;
+	border-color: var(--border-strong);
+}
+
+/* Étoiles cliquables plutôt qu'un select : le geste est direct */
+.sandbox-stars {
+	display: flex;
+	gap: 0.15rem;
+	height: 34px;
+	align-items: center;
+}
+
+.sandbox-stars__btn {
+	width: 26px;
+	background: none;
+	border: none;
+	padding: 0;
+	color: rgb(255 215 94 / 25%);
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	transition: color 0.1s;
+}
+
+.sandbox-stars__btn--on {
+	color: #ffd75e;
+}
+
+.sandbox-stars__btn:hover {
+	color: #fff3c4;
+}
+
+/* Le rôle : conséquence du slot spe, affiché pour que le joueur voie
+   l'effet de son choix sans lancer le combat. */
+.editor__role {
+	height: 34px;
+	display: flex;
+	align-items: center;
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #ffd75e;
+}
+
+/* ---------------------------------------------------------------------
+   8. SÉLECTEURS (espèces, items) : filtres + grilles scrollables
+   --------------------------------------------------------------------- */
+
+.sandbox-picker__filters {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.sandbox-picker__search {
+	flex: 1;
+	width: auto;
+	text-align: left;
+}
+
+.sandbox-picker__count {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: #c9b896;
+	white-space: nowrap;
+}
+
+.sandbox-picker__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+	gap: 0.6rem;
+	overflow-y: auto;
+	padding-right: 0.4rem;
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+
+.sandbox-picker__grid::-webkit-scrollbar {
+	width: 6px;
+}
+
+.sandbox-picker__grid::-webkit-scrollbar-thumb {
+	background-color: var(--border-strong);
+	border-radius: 3px;
+}
+
+.sandbox-picker__grid--items {
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.sandbox-picker__empty {
+	grid-column: 1 / -1;
+	margin: 0;
+	padding: 2rem;
+	text-align: center;
+	color: #c9b896;
+	font-size: 0.85rem;
+}
+
+/* --- Une case du sélecteur d'espèce --- */
+
+.species-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.6rem 0.4rem;
+	background-color: var(--bg-surface);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.species-cell:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.06);
+	z-index: 5;
+}
+
+.species-cell__sprite {
+	width: 50px;
+	height: 50px;
+	object-fit: contain;
+	image-rendering: pixelated;
+}
+
+.species-cell__name {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-align: center;
+	line-height: 1.1;
+	color: var(--text-second);
+}
+
+/* Pastilles de type en miniature : dans une grille de 251, elles ne
+   doivent qu'identifier d'un coup d'œil, pas dominer la case. */
+.species-cell__types {
+	display: flex;
+	gap: 0.15rem;
+	flex-wrap: wrap;
+	justify-content: center;
+	transform: scale(0.72);
+	transform-origin: center top;
+}
+
+/* --- Une case du sélecteur d'items --- */
+
+.item-choice {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.2rem;
+	padding: 0.6rem 0.5rem;
+	background-color: var(--bg-surface);
+	border: 2px solid var(--border-accent);
+	border-radius: var(--radius);
+	color: var(--text-second);
+	cursor: pointer;
+	transition:
+		transform 0.1s,
+		border-color 0.1s;
+}
+
+.item-choice:hover {
+	border-color: var(--border-strong);
+	transform: scale(1.06);
+	z-index: 5;
+}
+
+/* L'item déjà équipé dans ce slot : glow doré */
+.item-choice--equipped {
+	border-color: #b45f00;
+	animation: slot-pulse 2s ease-in-out infinite;
+}
+
+/* Item unique déjà porté ailleurs dans l'équipe : visible mais inerte
+   (anticipe le 400 DUPLICATE_UNIQUE_ITEM du back). */
+.item-choice--disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	filter: grayscale(1);
+}
+
+.item-choice[data-rarity="common"] {
+	background-color: var(--rarity-common);
+}
+.item-choice[data-rarity="rare"] {
+	background-color: var(--rarity-rare);
+}
+.item-choice[data-rarity="ultra_rare"] {
+	background-color: var(--rarity-ultra_rare);
+}
+.item-choice[data-rarity="legendary"] {
+	background-color: var(--rarity-legendary);
+}
+.item-choice[data-rarity="mythic"] {
+	background-color: var(--rarity-mythic);
+}
+
+.item-choice__icon {
+	width: 38px;
+	height: 38px;
+	object-fit: contain;
+	image-rendering: pixelated;
+	filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+.item-choice__name {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-align: center;
+	line-height: 1.1;
+	color: var(--text-second);
+}
+
+.item-choice__boost {
+	font-size: 0.78rem;
+	font-weight: 800;
+	color: #ffd75e;
+}
+
+/* Le mode = le rôle de combat (slot spe uniquement) */
+.item-choice__mode {
+	font-size: 0.58rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: #a8e063;
+	text-align: center;
+	line-height: 1.1;
+}
+
+.item-choice__type {
+	font-size: 0.6rem;
+	opacity: 0.75;
+}
+
+/* ---------------------------------------------------------------------
+   9. TOOLTIP ITEM (copie d'Inventory.css : la route doit vivre seule)
+      Fixed : jamais coupé par l'overflow des grilles.
+   --------------------------------------------------------------------- */
+
+.item-tooltip {
+	position: fixed;
+	z-index: 200;
+	min-width: 150px;
+	max-width: 220px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 0.7rem 0.85rem;
+	background-color: #2a1810;
+	border: 1px solid var(--border-strong);
+	border-left: 4px solid var(--border-strong);
+	border-radius: var(--radius);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
+}
+
+/* Bord gauche coloré par rareté */
+.item-tooltip[data-rarity="common"] {
+	border-left-color: var(--rarity-common);
+}
+.item-tooltip[data-rarity="rare"] {
+	border-left-color: var(--rarity-rare);
+}
+.item-tooltip[data-rarity="ultra_rare"] {
+	border-left-color: var(--rarity-ultra_rare);
+}
+.item-tooltip[data-rarity="legendary"] {
+	border-left-color: var(--rarity-legendary);
+}
+.item-tooltip[data-rarity="mythic"] {
+	border-left-color: var(--rarity-mythic);
+}
+
+.item-tooltip__name {
+	font-weight: 700;
+	color: #f5e6c8;
+	font-size: 0.9rem;
+}
+
+.item-tooltip__cat {
+	font-size: 0.72rem;
+	color: #c9b896;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.item-tooltip__boost {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #ffd75e;
+}
+
+.item-tooltip__line {
+	font-size: 0.72rem;
+	color: #e0d0b0;
+}
+
+/* ---------------------------------------------------------------------
+   10. ANIMATION PARTAGÉE — slot-pulse est défini dans Inventory.css,
+       qui n'est pas chargé ici. On la redéclare : le bac à sable doit
+       pouvoir vivre seul.
+   --------------------------------------------------------------------- */
+
+@keyframes slot-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(180, 95, 0, 0.7);
+	}
+	50% {
+		box-shadow: 0 0 12px 3px rgba(180, 95, 0, 0.95);
+	}
+}
