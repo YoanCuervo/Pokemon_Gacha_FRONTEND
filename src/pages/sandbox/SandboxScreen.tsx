@@ -157,6 +157,26 @@ export function SandboxScreen({ species, items }: SandboxScreenProps) {
 
 	const teamOf = (key: TeamKey) => (key === "a" ? teamA : teamB);
 
+	// Les template_ids d'items UNIQUES deja portes par les AUTRES membres
+	// de l'equipe en cours d'edition. Le slot edite est exclu : son propre
+	// item ne doit pas se griser lui-meme dans le picker. La regle est
+	// celle du back (DUPLICATE_UNIQUE_ITEM) : ici on ne fait que
+	// l'ANTICIPER pour que le joueur ne puisse pas la violer.
+	const usedUniqueIds = useMemo<number[]>(() => {
+		if (!editing) return [];
+		const team = teamOf(editing.key);
+		const ids = new Set<number>();
+		team.slots.forEach((member, index) => {
+			if (!member || index === editing.slot - 1) return;
+			for (const id of member.item_template_ids) {
+				const it = items.find((x) => x.template_id === id);
+				if (it?.is_unique) ids.add(id);
+			}
+		});
+		return [...ids];
+		// teamOf depend de teamA/teamB : on les liste explicitement.
+	}, [editing, teamA, teamB, items]);
+
 	/** Écrit (ou efface) un membre dans un slot. */
 	function handleSaveMember(member: SandboxMember | null) {
 		if (!editing) return;
@@ -226,6 +246,7 @@ export function SandboxScreen({ species, items }: SandboxScreenProps) {
 					member={editingMember}
 					species={species}
 					items={items}
+					usedUniqueIds={usedUniqueIds}
 					onSave={handleSaveMember}
 					onDelete={() => handleSaveMember(null)}
 					onCancel={() => setEditing(null)}

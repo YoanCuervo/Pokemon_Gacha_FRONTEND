@@ -3,18 +3,26 @@
 //
 // Reprend le design de CardPreview (pages/combat) : c'est le meilleur
 // rendu du projet, et il montre EXACTEMENT ce que le combat verra.
-// Deux differences assumees :
+// Differences assumees :
 //   - elle vit DANS le flux (grille de 6), pas en panneau flottant ;
-//   - elle est compacte (pas de liste detaillee des items).
+//   - les types sont des pastilles TypeBadge (langage de l'inventaire) ;
+//   - le detail des items est un TOOLTIP au hover (ItemTooltip,
+//     partage avec l'inventaire) — une liste texte ne tenait pas
+//     dans la carte. SetupItem ne porte ni required_type ni mode :
+//     le tooltip s'en passe (champs facultatifs), dette si besoin.
 // Les donnees viennent du back (MemberSetup) : le front ne reconstitue
 // rien depuis son draft, ce qui garantit que l'affichage colle au
 // calcul du moteur.
 // =====================================================================
 
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import { TypeBadge } from "../../components/TypeBadge";
 import { pokemonNameFr } from "../../i18n/pokemon.fr";
 import type { MemberSetup, SetupItem } from "../../types/combat";
-import { artworkUrl } from "../../utils/sprites";
+import { artworkUrl, itemSpriteUrl } from "../../utils/sprites";
 import { RoleIcon } from "../combat/RoleIcon";
+import { ItemTooltip } from "../inventory/ItemTooltip";
 
 /** L'ordre d'affichage des slots — la geographie fixe de l'equipement. */
 const SLOT_CATEGORIES: SetupItem["category"][] = ["att", "def", "speed", "spe"];
@@ -28,6 +36,13 @@ const CATEGORY_LABEL: Record<SetupItem["category"], string> = {
 
 const MAX_STARS = 5;
 
+/** Le tooltip suit la souris : item survole + position du curseur. */
+interface HoverState {
+	item: SetupItem;
+	x: number;
+	y: number;
+}
+
 interface SandboxCardProps {
 	/** Le membre tel que le moteur le voit (null si la preview n'a pas
 	 *  encore repondu : on affiche alors une carte en attente). */
@@ -37,6 +52,8 @@ interface SandboxCardProps {
 }
 
 export function SandboxCard({ setup, selected, onClick }: SandboxCardProps) {
+	const [hover, setHover] = useState<HoverState | null>(null);
+
 	const itemByCategory = (category: SetupItem["category"]) =>
 		setup.items.find((item) => item.category === category) ?? null;
 
@@ -46,7 +63,15 @@ export function SandboxCard({ setup, selected, onClick }: SandboxCardProps) {
 			className={`sandbox-card${selected ? " sandbox-card--selected" : ""}`}
 			data-type={setup.type_primary}
 			onClick={onClick}
+			onMouseLeave={() => setHover(null)}
 		>
+			{/* Pastilles de type en haut a gauche — meme langage que
+			    la carte d'inventaire (TypeBadge). */}
+			<span className="sandbox-card__types">
+				<TypeBadge type={setup.type_primary} />
+				{setup.type_secondary && <TypeBadge type={setup.type_secondary} />}
+			</span>
+
 			{/* Bandeau d'etoiles, pointe en bas — meme DA que le combat */}
 			<span className="sandbox-card__stars">
 				{Array.from({ length: MAX_STARS }, (_, i) => (
@@ -75,22 +100,52 @@ export function SandboxCard({ setup, selected, onClick }: SandboxCardProps) {
 			</span>
 
 			{/* Les 4 slots d'items : toujours les 4, vides en pointille.
-			    Le fond porte la rarete (meme langage que l'inventaire). */}
+			    Item present -> sprite, fond rarete, TOOLTIP au hover. */}
 			<span className="sandbox-card__items">
 				{SLOT_CATEGORIES.map((category) => {
 					const item = itemByCategory(category);
+					// Zone de hover purement informative DANS le bouton
+					// carte : pas d'element interactif imbrique possible
+					// (button dans button interdit), le span est legitime.
 					return (
 						<span
 							key={category}
 							className="sandbox-card__item"
 							data-rarity={item?.rarity}
-							title={item ? item.name : CATEGORY_LABEL[category]}
+							title={item ? undefined : CATEGORY_LABEL[category]}
+							onMouseMove={
+								item
+									? (e) => setHover({ item, x: e.clientX, y: e.clientY })
+									: undefined
+							}
+							onMouseLeave={item ? () => setHover(null) : undefined}
 						>
-							{item && CATEGORY_LABEL[category]}
+							{item && (
+								<img
+									className="sandbox-card__item-icon"
+									src={itemSpriteUrl(item.name)}
+									alt=""
+								/>
+							)}
 						</span>
 					);
 				})}
 			</span>
+
+			{hover &&
+				createPortal(
+					<ItemTooltip
+						name={hover.item.name}
+						category={hover.item.category}
+						rarity={hover.item.rarity}
+						boost_value={hover.item.boost}
+						required_type={null}
+						mode={null}
+						x={hover.x}
+						y={hover.y}
+					/>,
+					document.body,
+				)}
 
 			{/* Les deux chiffres du combat, en bordure basse (COMBAT_SPEC 11) */}
 			<span className="sandbox-card__attaque">{setup.attaque}</span>

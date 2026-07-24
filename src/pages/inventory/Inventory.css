@@ -521,6 +521,7 @@
 	font-size: 0.72rem;
 	color: #e0d0b0;
 }
+
 /* Boutons droite : poussés en bas (alignement avec la gauche) */
 .inventory__grid-actions {
 	display: flex;

@@ -13,7 +13,15 @@
      COMBAT_SPEC 8.1) : jamais une grille 3x2.
    - l'éditeur de membre tient sur UNE page. Les sélecteurs (251
      espèces, catalogue d'items) s'ouvrent par-dessus, à la demande.
+
+   Autonomie de la route : slot-pulse, le tooltip d'item et les
+   variables de rareté sont REDÉCLARÉS ici (Inventory.css et
+   combat.css ne sont pas chargés sur /sandbox).
    ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. CADRE GÉNÉRAL (overlay, frame, header, états)
+   --------------------------------------------------------------------- */
 
 .sandbox-overlay {
 	position: fixed;
@@ -81,6 +89,11 @@
 	text-align: center;
 }
 
+/* ---------------------------------------------------------------------
+   2. STRUCTURE DE L'ÉCRAN (équipes empilées scrollables, actions
+      ancrées en bas — le bouton LANCER ne doit JAMAIS sortir du cadre)
+   --------------------------------------------------------------------- */
+
 .sandbox {
 	display: flex;
 	flex-direction: column;
@@ -90,20 +103,28 @@
 }
 
 /* Empilées : chaque équipe a besoin de toute la largeur pour aligner
-   ses 6 slots en une ligne. */
+   ses 6 slots en une ligne. Si le contenu déborde, ce sont les
+   équipes qui scrollent, pas le bouton qui disparaît. */
 .sandbox__teams {
 	display: flex;
 	flex-direction: column;
 	gap: 1.75rem;
+	overflow-y: auto;
+	min-height: 0;
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
 }
 
 .sandbox__actions {
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	margin-top: auto;
+	flex-shrink: 0;
 }
 
-/* ---------- Une équipe ---------- */
+/* ---------------------------------------------------------------------
+   3. UNE ÉQUIPE (header nom + stats, ligne de 6 slots)
+   --------------------------------------------------------------------- */
 
 .team-composer {
 	display: flex;
@@ -126,7 +147,7 @@
 	font-size: 0.8rem;
 	font-weight: 700;
 	letter-spacing: 0.08em;
-	color: var(--text-second);
+	color: var(--text-main);
 	white-space: nowrap;
 }
 
@@ -207,9 +228,12 @@
 	padding: 0.75rem 0 1.25rem;
 }
 
-/* ---------- Slot VIDE ou EN ATTENTE ----------
-   Deux états transitoires, volontairement sobres : la carte de combat
-   ne s'affiche que quand le back a calculé les vraies stats. */
+/* ---------------------------------------------------------------------
+   4. SLOT VIDE ou EN ATTENTE — deux états transitoires, volontairement
+      sobres : la carte de combat ne s'affiche que quand le back a
+      calculé les vraies stats. Même min-height que .sandbox-card pour
+      que la ligne reste alignée.
+   --------------------------------------------------------------------- */
 
 .sandbox-slot {
 	position: relative;
@@ -218,7 +242,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0.2rem;
-	min-height: 152px;
+	min-height: 185px;
 	padding: 0.6rem 0.4rem;
 	background-color: var(--bg-surface);
 	border: 2px dashed var(--border-accent);
@@ -292,9 +316,9 @@
 }
 
 /* =====================================================================
-   LA CARTE DE COMBAT — reprise de combat.css, en version compacte et
-   DANS LE FLUX (pas en panneau flottant). Ce que le joueur voit ici,
-   il le reverra à l'identique sur le terrain.
+   5. LA CARTE DE COMBAT — reprise de combat.css, en version compacte
+      et DANS LE FLUX (pas en panneau flottant). Ce que le joueur voit
+      ici, il le reverra à l'identique sur le terrain.
    ===================================================================== */
 
 .sandbox-card {
@@ -303,8 +327,8 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 0.35rem;
-	min-height: 152px;
-	padding: 1.1rem 0.5rem 1.4rem;
+	min-height: 150px;
+	padding: 2.1rem 0.5rem 1.2rem;
 	border: none;
 	border-radius: 10px;
 	background: var(--type-color, #6b6b6b);
@@ -330,19 +354,21 @@
 	outline-offset: 1px;
 }
 
-.sandbox-card__sprite {
-	width: 68px;
-	height: 68px;
-	object-fit: contain;
-	filter: drop-shadow(0 2px 4px rgb(0 0 0 / 45%));
+/* Pastilles de type en haut à gauche — TypeBadge réduit, bordure
+   blanche pour rester lisible sur le fond coloré de la carte. */
+.sandbox-card__types {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	display: flex;
+	gap: 0.15rem;
+	transform: scale(0.72);
+	transform-origin: left top;
+	z-index: 2;
 }
 
-.sandbox-card__name {
-	font-size: 0.75rem;
-	font-weight: 700;
-	line-height: 1.1;
-	text-align: center;
-	text-shadow: 0 1px 3px rgb(0 0 0 / 55%);
+.sandbox-card__types .type-badge {
+	border: 1px solid #fff;
 }
 
 /* Bandeau d'étoiles — haut droite, pointe en bas (identique combat) */
@@ -354,7 +380,7 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 1px;
-	padding: 6px 4px 10px;
+	padding: 12px 8px 20px;
 	background: rgb(20 22 26 / 85%);
 	border: 1px solid rgb(255 215 94 / 45%);
 	border-top: none;
@@ -379,8 +405,24 @@
 	color: rgb(255 215 94 / 25%);
 }
 
+.sandbox-card__sprite {
+	width: 68px;
+	height: 68px;
+	object-fit: contain;
+	filter: drop-shadow(0 2px 4px rgb(0 0 0 / 45%));
+}
+
+.sandbox-card__name {
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.1;
+	text-align: center;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 55%);
+}
+
 /* Les 4 slots d'items : toujours les 4, vides en pointillé.
-   Le fond porte la rareté — même langage que l'inventaire. */
+   Le fond porte la rareté — même langage que l'inventaire.
+   Rempli : sprite de l'item + bordure blanche pleine (lisibilité). */
 .sandbox-card__items {
 	display: flex;
 	gap: 0.25rem;
@@ -395,16 +437,11 @@
 	border-radius: 4px;
 	border: 1px dashed rgb(255 255 255 / 35%);
 	background: rgb(0 0 0 / 20%);
-	font-size: 8px;
-	font-weight: 700;
-	letter-spacing: 0.03em;
-	color: #fff;
-	text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
 }
 
 .sandbox-card__item[data-rarity] {
 	border-style: solid;
-	border-color: rgb(255 255 255 / 45%);
+	border-color: #fff;
 	background: var(--rarity, rgb(0 0 0 / 20%));
 }
 
@@ -422,6 +459,13 @@
 }
 .sandbox-card__item[data-rarity="mythic"] {
 	--rarity: var(--rarity-mythic);
+}
+
+.sandbox-card__item-icon {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	image-rendering: pixelated;
 }
 
 /* Pastilles ATTAQUE / VIE — en bordure basse, débordantes (combat) */
@@ -524,9 +568,10 @@
 }
 
 /* =====================================================================
-   MODALES — éditeur de membre, sélecteurs.
-   Overlay ABSOLU (pas fixed) : la modale se cale sur le cadre du bac à
-   sable, pas sur la fenêtre — les slots restent visibles derrière.
+   6. MODALES — éditeur de membre, sélecteurs.
+      Overlay ABSOLU (pas fixed) : la modale se cale sur le cadre du
+      bac à sable, pas sur la fenêtre — les slots restent visibles
+      derrière.
    ===================================================================== */
 
 .sandbox-modal__overlay {
@@ -595,7 +640,16 @@
 	color: var(--text-second);
 }
 
-/* ---------- Éditeur : identité à gauche, items à droite ---------- */
+.sandbox-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	margin-top: auto;
+}
+
+/* ---------------------------------------------------------------------
+   7. ÉDITEUR : identité à gauche, items à droite, réglages en bas
+   --------------------------------------------------------------------- */
 
 .editor__body {
 	display: grid;
@@ -693,7 +747,7 @@
 	color: #ffd75e;
 }
 
-/* ---------- Réglages (niveau, étoiles, shiny, rôle) ---------- */
+/* --- Réglages (niveau, étoiles, shiny, rôle) --- */
 
 .editor__fields {
 	display: flex;
@@ -785,14 +839,9 @@
 	color: #ffd75e;
 }
 
-.sandbox-modal__actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 0.75rem;
-	margin-top: auto;
-}
-
-/* ---------- Sélecteurs (espèces, items) ---------- */
+/* ---------------------------------------------------------------------
+   8. SÉLECTEURS (espèces, items) : filtres + grilles scrollables
+   --------------------------------------------------------------------- */
 
 .sandbox-picker__filters {
 	display: flex;
@@ -845,7 +894,7 @@
 	font-size: 0.85rem;
 }
 
-/* ---------- Une case du sélecteur d'espèce ---------- */
+/* --- Une case du sélecteur d'espèce --- */
 
 .species-cell {
 	display: flex;
@@ -895,7 +944,7 @@
 	transform-origin: center top;
 }
 
-/* ---------- Une case du sélecteur d'items ---------- */
+/* --- Une case du sélecteur d'items --- */
 
 .item-choice {
 	display: flex;
@@ -923,6 +972,14 @@
 .item-choice--equipped {
 	border-color: #b45f00;
 	animation: slot-pulse 2s ease-in-out infinite;
+}
+
+/* Item unique déjà porté ailleurs dans l'équipe : visible mais inerte
+   (anticipe le 400 DUPLICATE_UNIQUE_ITEM du back). */
+.item-choice--disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	filter: grayscale(1);
 }
 
 .item-choice[data-rarity="common"] {
@@ -979,9 +1036,75 @@
 	opacity: 0.75;
 }
 
-/* ---------- Animation partagée ----------
-   slot-pulse est défini dans Inventory.css, qui n'est pas chargé ici.
-   On la redéclare : le bac à sable doit pouvoir vivre seul. */
+/* ---------------------------------------------------------------------
+   9. TOOLTIP ITEM (copie d'Inventory.css : la route doit vivre seule)
+      Fixed : jamais coupé par l'overflow des grilles.
+   --------------------------------------------------------------------- */
+
+.item-tooltip {
+	position: fixed;
+	z-index: 200;
+	min-width: 150px;
+	max-width: 220px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 0.7rem 0.85rem;
+	background-color: #2a1810;
+	border: 1px solid var(--border-strong);
+	border-left: 4px solid var(--border-strong);
+	border-radius: var(--radius);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
+}
+
+/* Bord gauche coloré par rareté */
+.item-tooltip[data-rarity="common"] {
+	border-left-color: var(--rarity-common);
+}
+.item-tooltip[data-rarity="rare"] {
+	border-left-color: var(--rarity-rare);
+}
+.item-tooltip[data-rarity="ultra_rare"] {
+	border-left-color: var(--rarity-ultra_rare);
+}
+.item-tooltip[data-rarity="legendary"] {
+	border-left-color: var(--rarity-legendary);
+}
+.item-tooltip[data-rarity="mythic"] {
+	border-left-color: var(--rarity-mythic);
+}
+
+.item-tooltip__name {
+	font-weight: 700;
+	color: #f5e6c8;
+	font-size: 0.9rem;
+}
+
+.item-tooltip__cat {
+	font-size: 0.72rem;
+	color: #c9b896;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.item-tooltip__boost {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #ffd75e;
+}
+
+.item-tooltip__line {
+	font-size: 0.72rem;
+	color: #e0d0b0;
+}
+
+/* ---------------------------------------------------------------------
+   10. ANIMATION PARTAGÉE — slot-pulse est défini dans Inventory.css,
+       qui n'est pas chargé ici. On la redéclare : le bac à sable doit
+       pouvoir vivre seul.
+   --------------------------------------------------------------------- */
+
 @keyframes slot-pulse {
 	0%,
 	100% {

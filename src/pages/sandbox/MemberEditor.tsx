@@ -49,6 +49,9 @@ interface MemberEditorProps {
 	member: SandboxMember | null;
 	species: SpeciesCatalogEntry[];
 	items: ItemCatalogEntry[];
+	/** Items UNIQUES deja portes ailleurs dans l'equipe : le picker
+	 *  les grise (la regle back DUPLICATE_UNIQUE_ITEM, anticipee). */
+	usedUniqueIds: number[];
 	onSave: (member: SandboxMember) => void;
 	onDelete: () => void;
 	onCancel: () => void;
@@ -64,6 +67,7 @@ export function MemberEditor({
 	member,
 	species,
 	items,
+	usedUniqueIds,
 	onSave,
 	onDelete,
 	onCancel,
@@ -140,6 +144,7 @@ export function MemberEditor({
 				items={items}
 				category={category}
 				equippedId={itemIn(category)?.template_id ?? null}
+				disabledIds={usedUniqueIds}
 				onPick={(templateId) => setItem(category, templateId)}
 				onClear={() => setItem(category, null)}
 				onCancel={() => setPicking(null)}

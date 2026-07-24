@@ -36,6 +36,9 @@ interface ItemPickerProps {
 	category: ItemCatalogEntry["category"];
 	/** L'item deja equipe dans ce slot (mis en avant). */
 	equippedId: number | null;
+	/** Items UNIQUES deja portes ailleurs dans l'equipe : grises,
+	 *  non selectionnables (anticipe le 400 DUPLICATE_UNIQUE_ITEM). */
+	disabledIds: number[];
 	onPick: (templateId: number) => void;
 	onClear: () => void;
 	onCancel: () => void;
@@ -49,6 +52,7 @@ export function ItemPicker({
 	items,
 	category,
 	equippedId,
+	disabledIds,
 	onPick,
 	onClear,
 	onCancel,
@@ -122,39 +126,51 @@ export function ItemPicker({
 				</div>
 
 				<div className="sandbox-picker__grid sandbox-picker__grid--items">
-					{visible.map((it) => (
-						<button
-							key={it.template_id}
-							type="button"
-							className={
-								it.template_id === equippedId
-									? "item-choice item-choice--equipped"
-									: "item-choice"
-							}
-							data-rarity={it.rarity}
-							onClick={() => onPick(it.template_id)}
-						>
-							<img
-								src={itemSpriteUrl(it.name)}
-								alt=""
-								className="item-choice__icon"
-							/>
-							<span className="item-choice__name">{itemNameFr(it.name)}</span>
-							<span className="item-choice__boost">+{it.boost_value}</span>
-							{/* Le mode n'existe que sur le slot spe : c'est le ROLE
-							    de combat. Le ?? protege d'un mode inconnu en base. */}
-							{it.mode && (
-								<span className="item-choice__mode">
-									{ROLE_FR[it.mode as CombatRole] ?? it.mode}
-								</span>
-							)}
-							{it.required_type && (
-								<span className="item-choice__type">
-									{typeNameFr(it.required_type)}
-								</span>
-							)}
-						</button>
-					))}
+					{visible.map((it) => {
+						// Unique deja porte par un AUTRE membre : visible mais
+						// grise, pour que le joueur COMPRENNE (le cacher serait
+						// un mystere ; le laisser cliquable serait un 400).
+						const disabled = disabledIds.includes(it.template_id);
+						return (
+							<button
+								key={it.template_id}
+								type="button"
+								disabled={disabled}
+								className={
+									it.template_id === equippedId
+										? "item-choice item-choice--equipped"
+										: disabled
+											? "item-choice item-choice--disabled"
+											: "item-choice"
+								}
+								data-rarity={it.rarity}
+								title={
+									disabled ? "Unique : déjà porté dans l'équipe" : undefined
+								}
+								onClick={() => onPick(it.template_id)}
+							>
+								<img
+									src={itemSpriteUrl(it.name)}
+									alt=""
+									className="item-choice__icon"
+								/>
+								<span className="item-choice__name">{itemNameFr(it.name)}</span>
+								<span className="item-choice__boost">+{it.boost_value}</span>
+								{/* Le mode n'existe que sur le slot spe : c'est le ROLE
+								    de combat. Le ?? protege d'un mode inconnu en base. */}
+								{it.mode && (
+									<span className="item-choice__mode">
+										{ROLE_FR[it.mode as CombatRole] ?? it.mode}
+									</span>
+								)}
+								{it.required_type && (
+									<span className="item-choice__type">
+										{typeNameFr(it.required_type)}
+									</span>
+								)}
+							</button>
+						);
+					})}
 					{visible.length === 0 && (
 						<p className="sandbox-picker__empty">Aucun objet.</p>
 					)}

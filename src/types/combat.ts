@@ -247,4 +247,5 @@ export interface ItemCatalogEntry {
 	mode: string | null;
 	rarity: Rarity;
 	boost_value: number;
+	is_unique: boolean | number;
 }
