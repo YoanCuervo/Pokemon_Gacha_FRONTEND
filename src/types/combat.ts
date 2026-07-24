@@ -175,3 +175,76 @@ export interface CombatLog {
 	version: 2;
 	events: CombatEvent[];
 }
+// ---------------------------------------------------------------------
+// BAC A SABLE (theorycrafting)
+// Le joueur compose LES DEUX equipes librement : n'importe quelle
+// espece, n'importe quel niveau/etoiles, n'importe quel item du
+// catalogue. Ces equipes sont ephemeres — rien n'est ecrit en base.
+// ---------------------------------------------------------------------
+
+/** Un pokemon compose a la main. Les stats de base viennent du
+ *  catalogue (pokemon_id) ; le reste est choisi par le joueur.
+ *  item_template_ids : 0 a 4 ids, UN PAR CATEGORIE au maximum. */
+export interface SandboxMember {
+	pokemon_id: number;
+	level: number;
+	stars: number;
+	is_shiny: boolean;
+	item_template_ids: number[];
+}
+
+export interface SandboxTeamDraft {
+	name: string;
+	slots: (SandboxMember | null)[];
+}
+
+/** Une equipe telle que le BACK l'attend : membres contigus. */
+export interface SandboxTeam {
+	name: string;
+	members: SandboxMember[];
+}
+
+/** Le payload envoye au back (preview ET combat). */
+export interface SandboxPayload {
+	teams: { a: SandboxTeam; b: SandboxTeam };
+}
+
+/** Les stats d'une equipe composee (la ligne sous les slots).
+ *  members : des MemberSetup COMPLETS, identiques a ceux du setup de
+ *  combat — le front dessine la meme carte des deux cotes. */
+export interface SandboxTeamPreview {
+	total_speed: number;
+	total_attaque: number;
+	total_vie: number;
+	members: MemberSetup[];
+}
+
+/** La reponse de POST /api/sandbox/preview. */
+export interface SandboxPreview {
+	teams: { a: SandboxTeamPreview; b: SandboxTeamPreview };
+}
+
+// ---------------------------------------------------------------------
+// Catalogues (selecteurs du bac a sable)
+// ---------------------------------------------------------------------
+
+/** Une espece du catalogue (251), pour le selecteur. */
+export interface SpeciesCatalogEntry {
+	pokemon_id: number;
+	name: string;
+	type_primary: string;
+	type_secondary: string | null;
+}
+
+/** Un item du catalogue, pour le selecteur.
+ *  La rarete est PORTEE par le template : chaque item existe en 5
+ *  variantes (une par rarete), le joueur choisit un id. */
+export interface ItemCatalogEntry {
+	template_id: number;
+	name: string;
+	category: "att" | "def" | "speed" | "spe";
+	required_type: string | null;
+	mode: string | null;
+	rarity: Rarity;
+	boost_value: number;
+}

@@ -97,6 +97,7 @@
 	color: var(--text-muted);
 	font-size: 0.85rem;
 	text-align: center;
+	text-decoration: none;
 }
 
 .home-team-preview {

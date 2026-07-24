@@ -1,11 +1,15 @@
 // =====================================================================
 // pages/combat/CombatPage.tsx — La page COMBAT (rendu statique v1).
-// Fetch POST /api/combat → CombatLog, puis useCombatPlayer pilote tout.
-// --tempo est exposé en variable CSS : les durées d'animation du
-// chantier suivant se caleront dessus sans JS supplémentaire.
+// Le log peut venir de DEUX sources :
+//   - fourni par la navigation (bac a sable, et demain PVE/PVP) ;
+//   - fetch par defaut (combat miroir V1).
+// Un seul ecran de combat pour tout le jeu, plusieurs sources de log.
+// --tempo est expose en variable CSS : les durees d'animation se
+// calent dessus sans JS supplementaire.
 // =====================================================================
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router";
 import { useCombatPlayer } from "../../hooks/useCombatPlayer";
 import { runCombat } from "../../services/combat.service";
 import type { CombatLog, CombatUid, TeamKey } from "../../types/combat";
@@ -19,7 +23,9 @@ import "./combat.css";
 
 /** Dette auth (JWT à venir) : en V1 miroir, le joueur est l'équipe "a".
  *  Quand l'auth existera, myTeamKey sera dérivé de setup.teams.X.user_id
- *  vs l'utilisateur connecté. Un seul endroit à changer. */
+ *  vs l'utilisateur connecté. Un seul endroit à changer.
+ *  En bac a sable, "a" est la compo de gauche — le joueur pilote les
+ *  deux, la notion de "mon equipe" n'a pas de sens, on garde "a". */
 const MY_TEAM_KEY: TeamKey = "a";
 
 type LoadState =
@@ -28,10 +34,27 @@ type LoadState =
 	| { status: "ready"; log: CombatLog };
 
 export function CombatPage() {
-	const [load, setLoad] = useState<LoadState>({ status: "loading" });
+	const location = useLocation();
+
+	// Un log fourni par la navigation (bac a sable) court-circuite le
+	// fetch. Perdu au rafraichissement (state de route) : acceptable,
+	// un combat n'est pas une page a bookmarker.
+	const providedLog =
+		(location.state as { log?: CombatLog } | null)?.log ?? null;
+
+	const [load, setLoad] = useState<LoadState>(
+		providedLog ? { status: "ready", log: providedLog } : { status: "loading" },
+	);
 
 	useEffect(() => {
+		// Log deja fourni : rien a charger.
+		if (providedLog) {
+			setLoad({ status: "ready", log: providedLog });
+			return;
+		}
+
 		let cancelled = false;
+		setLoad({ status: "loading" });
 		runCombat()
 			.then((log) => {
 				if (!cancelled) setLoad({ status: "ready", log });
@@ -46,7 +69,7 @@ export function CombatPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [providedLog]);
 
 	if (load.status === "loading")
 		return <p className="combat-page__loading">Combat en préparation…</p>;

@@ -15,7 +15,7 @@ const ITEM_FR: Record<string, string> = {
 	Leftovers: "Restes",
 	"Choice Scarf": "Mouchoir Choix",
 	"Life Orb": "Orbe Vie",
-	"Accro Claw": "Griffe Accro", // création maison, pas de VF officielle
+	"Grip Claw": "Griffe Accro",
 
 	// Items de type — att
 	"Dragon Fang": "Croc Dragon",

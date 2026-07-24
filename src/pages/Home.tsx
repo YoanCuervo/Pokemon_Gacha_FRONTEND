@@ -59,7 +59,9 @@ function Home() {
 					})}
 				</div>
 				<nav className="home-menu">
-					<div className="home-menu-item">ALLIANCE</div>
+					<Link to="/sandbox" className="home-menu-item">
+						TOUR D'ENTRAÎNEMENT
+					</Link>
 					<div className="home-menu-item">EVENEMENTS</div>
 				</nav>
 			</div>
